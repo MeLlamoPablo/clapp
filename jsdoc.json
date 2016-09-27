@@ -1,0 +1,15 @@
+{
+	"source": {
+		"include": [
+			"./lib/index.js",
+			"./lib/Command.js"
+		]
+	},
+	"opts": {
+		"package": "./package.json",
+		"template": "./node_modules/docdash",
+		"tutorials": "./tutorials/",
+		"readme": "./README_jsdoc.md",
+		"destination": "./docs"
+	}
+}
