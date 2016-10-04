@@ -1,5 +1,5 @@
 # clapp [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
-> A tool for building command line apps that don&#39;t aren&#39;t necessarily built for the command line.
+> A tool for building command line apps that aren&#39;t necessarily built for the command line.
 
 ## Installation
 
