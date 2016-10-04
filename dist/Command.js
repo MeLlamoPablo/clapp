@@ -56,9 +56,9 @@ var str = require('./strings/en.js');
 
 var Command = function () {
 	function Command(name, fn) {
-		var desc = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
-		var args = arguments.length <= 3 || arguments[3] === undefined ? [] : arguments[3];
-		var flags = arguments.length <= 4 || arguments[4] === undefined ? [] : arguments[4];
+		var desc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
+		var args = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
+		var flags = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
 
 		_classCallCheck(this, Command);
 

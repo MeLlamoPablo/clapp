@@ -45,7 +45,7 @@ var str = require('./strings/en.js');
 
 var App = function () {
 	function App(options, onReply) {
-		var commands = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+		var commands = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
 		_classCallCheck(this, App);
 
