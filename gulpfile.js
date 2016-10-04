@@ -77,3 +77,7 @@ gulp.task('clean', function () {
 
 gulp.task('prepublish', ['nsp', 'babel']);
 gulp.task('default', ['static', 'test', 'coveralls']);
+
+// I added this comment just to trigger travis
+// (The project wasn't on coveralls for the first build.
+// Sorry :(
