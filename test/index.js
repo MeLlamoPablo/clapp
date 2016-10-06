@@ -200,7 +200,7 @@ describe('Clapp.App', function(){
 
 			app.parseInput('/app foo --help');
 
-			expect(help).to.be.a('string'); console.log(help);
+			expect(help).to.be.a('string');
 		});
 	});
 

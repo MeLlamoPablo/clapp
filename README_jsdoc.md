@@ -17,7 +17,7 @@ $ npm install --save clapp
 ## Usage
 
 ```js
-var clapp = require('clapp');
+var Clapp = require('clapp');
 
 var app = new Clapp.App({
 	name: 'Test App',
@@ -36,7 +36,7 @@ app.addCommand(new Clapp.Command(
 	'does foo things' // Command description
 ));
 
-app.parseInput('/app foo');
+app.parseInput('-testapp foo');
 ```
 
 To get started see the [App reference]{@link App} and [Command reference]{@link Command}.
