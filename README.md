@@ -52,7 +52,7 @@ Apache-2.0 © [Pablo Rodríguez](https://github.com/MeLlamoPablo)
 [travis-url]: https://travis-ci.org/MeLlamoPablo/clapp
 [daviddm-image]: https://david-dm.org/MeLlamoPablo/clapp.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/MeLlamoPablo/clapp
-[coveralls-image]: https://coveralls.io/repos/MeLlamoPablo/clapp/badge.svg
-[coveralls-url]: https://coveralls.io/r/MeLlamoPablo/clapp
+[coveralls-image]: https://coveralls.io/repos/github/MeLlamoPablo/clapp/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/MeLlamoPablo/clapp?branch=master
 
 [docs]: http://mellamopablo.github.io/clapp/latest.html
