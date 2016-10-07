@@ -170,7 +170,7 @@ var App = function () {
 				if (argv.help || input === this.prefix) {
 					// The help flag was passed OR the user typed just the command prefix.
 					// Show app help.
-					this.reply(this._getAppHelp(), context);
+					this.reply(this._getHelp(), context);
 				} else if (argv.version) {
 					// The user asked for the app version
 					this.reply('v' + this.version, context);
@@ -279,8 +279,8 @@ var App = function () {
    */
 
 	}, {
-		key: '_getAppHelp',
-		value: function _getAppHelp() {
+		key: '_getHelp',
+		value: function _getHelp() {
 			var r = this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' + this.desc + '\n\n' + str.help_usage + this.prefix + ' ' + str.help_command + '\n\n' + str.help_cmd_list + '\n\n';
 
 			// Command list

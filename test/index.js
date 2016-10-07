@@ -205,7 +205,7 @@ describe('Clapp.App', function(){
 	});
 
 	describe('#addCommand()', function(){
-		it('should  only accept Command types', function(){
+		it('should only accept Command types', function(){
 			var thrown = [];
 
 			var app = new Clapp.App(
@@ -227,6 +227,67 @@ describe('Clapp.App', function(){
 			}
 
 			expect(thrown).to.eql(['a', 'b']);
+		});
+
+		it('should accept child instances of Command', function(){
+			class MyCommand extends Clapp.Command {
+				constructor(name, fn, desc = '', args = [], flags = []) {
+					super(name, fn, desc, args, flags);
+				}
+
+				_getHelp(app) {
+					return 'The command help for command "' + this.name + '" is overridden! D:'
+				}
+			}
+
+			var response;
+
+			var app = new Clapp.App(
+				{
+					name: 'test', desc: 'desc', prefix: '/app'
+				}, function(msg) {
+					response = msg;
+				}
+			);
+
+			app.addCommand(new MyCommand(
+				'foo',
+				function() {},
+				'does foo things'
+			));
+
+			app.parseInput("/app foo --help");
+
+			expect(response).to.be("The command help for command \"foo\" is overridden! D:")
+
+		});
+	});
+
+	describe('#_getHelp()', function(){
+		it('should show help for child instances of App', function(){
+			class MyApp extends Clapp.App {
+				constructor(options, onReply, commands = []) {
+					super(options, onReply, commands);
+				}
+
+				_getHelp() {
+					return 'The help for the app "' + this.name + '" is overridden! D:';
+				}
+			}
+
+			var response;
+
+			var app = new MyApp(
+				{
+					name: 'test', desc: 'desc', prefix: '/app'
+				}, function(msg) {
+					response = msg;
+				}
+			);
+
+			app.parseInput("/app");
+
+			expect(response).to.be("The help for the app \"test\" is overridden! D:")
 		});
 	});
 
