@@ -5,7 +5,7 @@ The documentation shows a very basic example of what a command is: when the user
 * `argv` contains the arguments and flags, and
 * `context` contains your own information. See "[Working with contexts]{@tutorial working-with-contexts}" for further info about contexts.
 
-### The `argv` object
+## The `argv` object
 
 The `argv` object contains two children:
 
@@ -52,9 +52,13 @@ function(argv, context) {
 }
 ```
 
-### Returning a message
+## Returning data
 
-Generally, you want to return a message to the user with the feedback about the operation they just did. In your command function, you can `return` a string that will be redirected to your `onReply` function, using the same context that was passed into your command function. For instance:
+Generally, you want to return a message to the user with the feedback about the operation they just did.
+
+#### Returning a message
+
+In your command function, you can `return` a `string` that will be redirected to your `onReply` function (in the `msg` parameter), using the same context that was passed into your command function. For instance:
 
 ```javascript
 // Command function
@@ -68,4 +72,36 @@ function(argv, context) {
 }
 ```
 
-If you don't want to send a message, just return something that is not `string` or don't return nothing at all.
+#### Modifying the context
+
+If you also need to pass your own data to your `onReply` function, you can modify the context, and `return` an `object` containing two properties: `message` and `context`. For instance:
+
+```javascript
+// Command function
+function(argv, context) {
+	if (argv.flags.limit < 50) {
+		doTheThing();
+		return {
+			message: 'Operation successful!',
+			context: {
+				operation_complete: true
+			}
+		};
+	} else {
+		return {
+			message: 'The limit can\'t be higher than 50, sorry!',
+			context: {
+				operation_complete: false
+			}
+		};
+	}
+}
+```
+
+You may omit the `message` param, though it is not recommended. If you do it, your `onReply`'s `msg` will be `undefined`, wich may cause unexpected behaviour. So you should probably prepare your function for that scenario.
+
+To learn more about contexts, see [Working with contexts]{@tutorial Working-with-contexts}.
+
+#### Not doing anything
+
+If you don't want to send a message, just return something that is neither `string` nor `object` or don't return nothing at all.

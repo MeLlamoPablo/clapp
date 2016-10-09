@@ -4,7 +4,7 @@ When the user passes the `--help` flag, Clapp automatically generates a command 
 
 That can be done by extending the default Classes: [App]{@link App} and [Command]{@link Command}.
 
-### Extending Command
+## Extending Command
 
 In order to extend command, declare your own class, and call `super` indide the constrcutor:
 
@@ -93,7 +93,7 @@ Note that the `str` object won't be available to you since Clapp doesn't export 
 const printTable = require('tableprinter');
 ```
 
-### Extending App
+## Extending App
 
 The procedure for extending App is the same:
 

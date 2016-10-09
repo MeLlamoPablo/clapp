@@ -131,6 +131,31 @@ describe('Clapp.App', function(){
 			expect(passed_argv.flags.testflag).to.be.ok();
 		});
 
+		it('should allow modifications in the context', function(){
+			var c;
+			var foo = new Clapp.Command(
+				'foo', function(argv, context) {
+					context.push('b');
+					return {
+						message: 'return message',
+						context: context
+					};
+				}
+			);
+
+			var app = new Clapp.App(
+				{
+					name: 'test', desc: 'desc', prefix: '/app'
+				}, function(msg, context) {
+					c = context;
+				}, [foo]
+			);
+
+			app.parseInput('/app foo', ['a']);
+
+			expect(c).to.eql(['a', 'b']);
+		});
+
 		it('should show app version', function(){
 			var version;
 			var foo = new Clapp.Command(
