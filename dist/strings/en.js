@@ -14,8 +14,8 @@ module.exports = {
 	// Errors
 	err: 'Error: ',
 
-	err_unknown_command: 'unknown command `%CMD%`.',
+	err_unknown_command: 'unknown command %CMD%.',
 	err_unfulfilled_args: 'not every required argument was fulfilled. Missing arguments:',
-	err_type_help: 'Type `%PREFIX% --help` for help.'
+	err_type_help: 'Type %PREFIX% --help for help.'
 
 };
