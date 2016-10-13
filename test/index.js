@@ -65,6 +65,32 @@ describe('Clapp.App', function(){
 			expect(executed).to.be.ok();
 		});
 
+		it('should execute async commands', function(done){
+			var r;
+			var foo = new Clapp.Command(
+				'foo', function(argv, context, cb) {
+					setTimeout(function() {
+						cb('message');
+					}, 100);
+				}, 'desc', [], [], true
+			);
+
+			var app = new Clapp.App(
+				{
+					name: 'test', desc: 'desc', prefix: '/app'
+				}, function(msg) {
+					r = msg;
+				}, [foo]
+			);
+
+			app.parseInput('/app foo');
+
+			setTimeout(function(){
+				expect(r).to.be('message');
+				done();
+			}, 200);
+		});
+
 		it('should pass flags and arguments', function(){
 			var passed_argv;
 

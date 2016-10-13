@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Overriding-the-default-help-generators - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Tutorial: Overriding-the-default-help-generators</h1>
+    
+
+    <section>
+
+<header>
+    
+
+    <h2>Overriding-the-default-help-generators</h2>
+</header>
+
+<article>
+    <h1>Overriding the default help generators</h1><p>When the user passes the <code>--help</code> flag, Clapp automatically generates a command help and outputs it. This is good enough in some scenarios, but in others you might need to override the default <code>_getHelp()</code> methods to print the help in your custom style. For example, if we were to design a Discord bot using Clapp, we'd want to take advantage of the Discord markdown; so we'd need to override the default help generator.</p>
+<p>That can be done by extending the default Classes: <a href="App.html">App</a> and <a href="Command.html">Command</a>.</p>
+<h2>Extending Command</h2><p>In order to extend command, declare your own class, and call <code>super</code> indide the constrcutor:</p>
+<pre class="prettyprint source lang-js"><code>class MyCommand extends Clapp.Command {
+    constructor(name, fn, desc = '', args = [], flags = []) {
+        super(name, fn, desc, args, flags);
+    }
+}</code></pre><p>After that, you may implement your own <code>_getHelp()</code> method:</p>
+<pre class="prettyprint source lang-js"><code>class MyCommand extends Clapp.Command {
+    constructor(name, fn, desc = '', args = [], flags = []) {
+        super(name, fn, desc, args, flags);
+    }
+
+
+    _getHelp(app) {
+        /**
+         * You may use &quot;app&quot; and &quot;this&quot; to document your help.
+         * App is the Clapp.App instance of the app containing this
+         * command, and &quot;this&quot; is the command itself.
+         */
+        return 'The help for command &quot;' +
+               this.name + '&quot; is overridden! D:'
+    }
+}</code></pre><p>You could start from copying the original <code>_getHelp()</code> from the source code, and then change it:</p>
+<pre class="prettyprint source lang-js"><code>_getHelp(app) {
+    var r = str.help_usage + ' ' + app.prefix + ' ' + this.name;
+
+    // Add every argument to the usage (Only if there are arguments)
+    if (Object.keys(this.args).length > 0) {
+        var args_data = [];
+        for (var i in this.args) {
+            r += this.args[i].required ? ' (' + i + ')' : ' [' + i + ']';
+            args_data.push({
+                'Argument': i,
+                'Description': typeof this.args[i].desc !== 'undefined' ?
+                               this.args[i].desc : '',
+                'Default': typeof this.args[i].default !== 'undefined' ?
+                           this.args[i].default : ''
+            });
+        }
+    }
+
+    r += '\n' + this.desc;
+
+    if (Object.keys(this.args).length > 0)
+        r += '\n\n' + str.help_av_args + ':\n\n' + printTable(args_data);
+
+    // Add every flag, only if there are flags to add
+    if (Object.keys(this.flags).length > 0) {
+        var flags_data = [];
+        for (i in this.flags) {
+            flags_data.push({
+                'Option': (typeof this.flags[i].alias !== 'undefined' ?
+                        '-' + this.flags[i].alias + ', ' : '') + '--' + i,
+                'Description': typeof this.flags[i].desc !== 'undefined' ?
+                    this.flags[i].desc : '',
+                'Default': typeof this.flags[i].default !== 'undefined' ?
+                    this.flags[i].default : ''
+            });
+        }
+
+        r += '\n\n' + str.help_av_options + ':\n\n' + printTable(flags_data);
+    }
+
+    if (Object.keys(this.args).length > 0)
+        r += '\n\n' + str.help_args_required_optional;
+
+    return r;
+}</code></pre><p>Note that the <code>str</code> object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the <a href="https://www.npmjs.com/package/tableprinter">printTable</a> function comes already as a dependency with Clapp, so fel free to use it with:</p>
+<pre class="prettyprint source lang-js"><code>const printTable = require('tableprinter');</code></pre><h2>Extending App</h2><p>The procedure for extending App is the same:</p>
+<pre class="prettyprint source lang-js"><code>class MyApp extends Clapp.App {
+    constructor(options, onReply, commands = []) {
+        super(options, onReply, commands);
+    }
+
+    _getHelp() {
+        return 'The help for the app &quot;' + this.name + '&quot; is overridden! D:';
+    }
+}</code></pre><p>Here's the source from <code>_getHelp()</code>, in case you want to start from there:</p>
+<pre class="prettyprint source lang-js"><code>_getHelp() {
+    var r =
+        this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' +
+        this.desc + '\n\n' +
+
+        str.help_usage + this.prefix + ' ' + str.help_command + '\n\n' +
+
+        str.help_cmd_list + '\n\n'
+    ;
+
+    // Command list
+    var data = [];
+    for (var i in this.commands) {
+        data.push({
+            'Command': i,
+            'Description': this.commands[i].desc
+        });
+    }
+
+    r +=
+        printTable(data) + '\n\n' +
+        str.help_further_help + this.prefix + ' ' + str.help_command + ' --help'
+    ;
+
+    return r;
+}</code></pre><p>Again, you won't be able to use the <code>str</code> object, so watch out for that.</p>
+</article>
+
+</section>
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Sun Oct 09 2016 16:33:01 GMT+0200 (Hora de verano romance) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

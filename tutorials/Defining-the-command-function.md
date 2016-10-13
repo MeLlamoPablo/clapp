@@ -105,3 +105,55 @@ To learn more about contexts, see [Working with contexts]{@tutorial Working-with
 #### Not doing anything
 
 If you don't want to send a message, just return something that is neither `string` nor `object` or don't return nothing at all.
+
+## Asynchronous functions
+
+In some cases, you might need your command's `fn` to behave asynchronously. In order to do so, first you need to set the `async` parameter to `true`:
+
+```javascript
+new Clapp.Command(
+	'foo',
+	// [...]
+	true // Set the fn to be async
+);
+```
+
+Now, the data returned with the `return` statement will be ignored. Instead, your `fn` will receive three parameters: `argv`, `context`, and `callback`:
+
+```javascript
+// Command function
+function(argv, context, callback) {
+	doTheThing().then(() => {
+		callback();
+	});
+}
+```
+
+When you call the `callback`, Clapp will understand that the command execution is over. Of course, you can use the `callback` to pass your response and modify the context:
+
+#### Returning a message
+
+`callback` accepts a string as its first parameter: the message that will be redirected to your `onReply` function. Be careful, it can only be a string, other data types won't trigger `onReply`.
+
+```javascript
+// Command function
+function(argv, context, callback) {
+	doTheThing().then(thing => {
+		callback(thing.toString());
+	});
+}
+```
+
+#### Modifying the context
+
+`callback` accepts the modified `context` as its second parameter. If you don't pass anything, the current `context` will also be redirected to `onReply`.
+
+```javascript
+// Command function
+function(argv, context, callback) {
+	doTheThing().then((foo, bar) => {
+		context.bar = bar;
+		callback(foo.toString(), context);
+	});
+}
+```

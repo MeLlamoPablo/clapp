@@ -14,15 +14,21 @@ var str = require('./strings/en.js');
  * redirected to the app output (See: {@link onReply}).
  *
  * @class  Command
- * @param {string} name The command's name. The command will be invoked by writing the app prefix
- *                      followed by a space and the command's name.
- * @param {function} fn The function that will be executed when the command is invoked. The
- *                      function receives the following params: {@link argv} and context. For more
- *                      information, see {@tutorial Defining-the-command-function}.
- * @param {string} [desc] A description of what the command does.
- * @param {argument[]} [arguments] An array with every argument supported by the command. See
- *                                 {@link argument}.
- * @param {flag[]} [flags] An array with every flag supported by the command. See {@link flag}.
+ * @param {string}     name            The command's name. The command will be invoked by writing
+ *                                     the app prefix followed by a space and the command's name.
+ * @param {function}   fn              The function that will be executed when the command is
+ *                                     invoked. The function receives the following params:
+ *                                     {@link argv} and context. For more information, see
+ *                                     {@tutorial Defining-the-command-function}.
+ * @param {string}     [desc]          A description of what the command does.
+ * @param {argument[]} [arguments]     An array with every argument supported by the command.
+ *                                     See {@link argument}.
+ * @param {flag[]}     [flags]         An array with every flag supported by the command.
+ *                                     See {@link flag}.
+ * @param {boolean}    [async=false]   Whether or not the command's function is asynchronous.
+ *                                     If it is, it will receive a third parameter: callback,
+ *                                     that you will need to call when the process is over.
+ *                                     See {@tutorial Defining-the-command-function}.
  *
  * @example
  * var foo = new Clapp.Command(
@@ -59,13 +65,15 @@ var Command = function () {
 		var desc = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 		var args = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : [];
 		var flags = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : [];
+		var async = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : false;
 
 		_classCallCheck(this, Command);
 
-		if (typeof name !== 'string' || name === '' || typeof desc !== 'string' || !Array.isArray(args) || !Array.isArray(flags) || typeof fn !== 'function') throw new Error('Wrong parameters passed when creating command ' + name + '. Please refer to the documentation.');
+		if (typeof name !== 'string' || name === '' || typeof desc !== 'string' || !Array.isArray(args) || !Array.isArray(flags) || typeof async !== 'boolean' || typeof fn !== 'function') throw new Error('Wrong parameters passed when creating command ' + name + '. Please refer to the documentation.');
 
 		this.name = name;
 		this.desc = desc;
+		this.async = async;
 
 		/**
    * @typedef {Object} argument

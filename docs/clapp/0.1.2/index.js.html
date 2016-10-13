@@ -1,4 +1,43 @@
-'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>index.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">index.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
 const parseSentence   = require('minimist-string');
 const printTable      = require('tableprinter');
@@ -12,22 +51,13 @@ const str             = require('./strings/en.js');
  * An App needs an onReply function to be able to communicate with the user.
  *
  * @class App
- * @param {object} options
- * @param {string} options.name      The app's name. This isn't necessarily the same as the prefix.
- *                                   Its only purpose is to be shown to the user in case of syntax
- *                                   error, or when they request the app help.
- * @param {string} options.desc      A description of what the app does. This will be used to
- *                                   document the app's help.
- * @param {string} options.prefix    The app's prefix. It will be used by {@link parseInput} to
- *                                   determine the user's intention to run a command corresponding
- *                                   to this App instance.
- * @param {string} [options.version] The app's version. It will be used to document the app's help.
- * @param {onReply} onReply          A function that allows the App to communicate with the end user.
- *                                   When the App needs to show an output, the onReply function will
- *                                   be executed.
- * @param {Command[]} [commands]     An array of commands that will immediately be bound to the
- *                                   app. Additional commands can be later bound using
- *                                   {@link addCommand}.
+ * @param {appOptions} options   An object containing the app options. See {@link appOptions}.
+ * @param {onReply} onReply      A function that allows the App to communicate with the end user.
+ *                               When the App needs to show an output, the onReply function will be
+ *                               executed.
+ * @param {Command[]} [commands] An array of commands that will immediatly be bound to the
+ *                               app. Aditional commands can be later bound using
+ *                               {@link addCommand}.
  *
  * @example
  * const Clapp = require('clapp');
@@ -50,6 +80,30 @@ const str             = require('./strings/en.js');
 class App {
 
 	constructor(options, onReply, commands = []) {
+		/**
+		 * @typedef {Object} appOptions
+		 *
+		 * An object that contains the options needed to construct the App instance.
+		 *
+		 * @property {string} name The app's name. This isn't necessarily the same as the prefix.
+		 *                         Its only purpose is to be shown to the user in case of syntax
+		 *                         error, or when they request the app help.
+		 * @property {string} desc A description of what the app does. This will be used to document
+		 *                         the app's help.
+		 * @property {string} prefix The app's prefix. It will be used by {@link parseInput} to
+		 *                           determine the user's intention to run a command corresponding
+		 *                           to this App instance.
+		 * @property {string} [version] The app's version. It will be used to document the app's
+		 *                              help.
+		 *
+		 * @example
+		 * var appOptions = {
+		 * 	name: 'Test App',
+		 * 	desc: 'An app created with Clapp!',
+		 * 	prefix: '/testapp', // Commands will have this structure: /testapp foo --bar
+		 * 	version: '1.2.0'
+		 * };
+		 */
 		if (
 			typeof options        === 'undefined' ||
 			typeof options.name   !== 'string'    ||
@@ -85,7 +139,7 @@ class App {
 		this.reply = onReply;
 
 		this.commands = {};
-		for (var i = 0; i < commands.length; i++) {
+		for (var i = 0; i &lt; commands.length; i++) {
 			this.addCommand(commands[i]);
 		}
 	}
@@ -171,7 +225,7 @@ class App {
 				var unfulfilled_args = {};
 				var j = 1; // 1 because argv._[0] is the command name
 				for (var i in cmd.args) {
-					if (cmd.args[i].required && typeof argv._[j] === 'undefined')
+					if (cmd.args[i].required &amp;&amp; typeof argv._[j] === 'undefined')
 						unfulfilled_args[i] = cmd.args[i];
 				}
 
@@ -196,7 +250,7 @@ class App {
 
 						// If the arg wasn't supplied and it has a default value, show it
 						if (typeof final_argv.args[i] === 'undefined'
-						    && typeof cmd.args[i].default !== 'undefined')
+						    &amp;&amp; typeof cmd.args[i].default !== 'undefined')
 							final_argv.args[i] = cmd.args[i].default;
 
 						j++;
@@ -235,34 +289,8 @@ class App {
 					 * 	}
 					 * }
 					 */
-					if(!this.commands[argv._[0]].async) {
-						var response = this.commands[argv._[0]].fn(final_argv, context);
-
-						if (typeof response === 'string') {
-							this.reply(response, context);
-						} else if (typeof response === 'object' &&
-							(
-								typeof response.message !== 'undefined' ||
-								typeof response.context !== 'undefined'
-							)) {
-							this.reply(response.message, response.context);
-						}
-					} else {
-						var self = this;
-						this.commands[argv._[0]].fn(
-							final_argv,
-							context,
-							function cb(response, newContext) {
-								if (typeof response === 'string') {
-									if (typeof newContext !== 'undefined') {
-										self.reply(response, newContext);
-									} else {
-										self.reply(response, context);
-									}
-								}
-							}
-						);
-					}
+					var response = this.commands[argv._[0]].fn(final_argv, context);
+					if(typeof response === 'string') this.reply(response, context);
 				}
 			}
 		}
@@ -316,9 +344,29 @@ class App {
 
 		return r;
 	}
+
 }
 
 module.exports = {
 	App: App,
 	Command: Command
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Sat Oct 08 2016 13:58:07 GMT+0200 (Hora de verano romance) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

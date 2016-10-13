@@ -18,13 +18,22 @@ var str = require('./strings/en.js');
  * An App needs an onReply function to be able to communicate with the user.
  *
  * @class App
- * @param {appOptions} options   An object containing the app options. See {@link appOptions}.
- * @param {onReply} onReply      A function that allows the App to communicate with the end user.
- *                               When the App needs to show an output, the onReply function will be
- *                               executed.
- * @param {Command[]} [commands] An array of commands that will immediatly be bound to the
- *                               app. Aditional commands can be later bound using
- *                               {@link addCommand}.
+ * @param {object} options
+ * @param {string} options.name      The app's name. This isn't necessarily the same as the prefix.
+ *                                   Its only purpose is to be shown to the user in case of syntax
+ *                                   error, or when they request the app help.
+ * @param {string} options.desc      A description of what the app does. This will be used to
+ *                                   document the app's help.
+ * @param {string} options.prefix    The app's prefix. It will be used by {@link parseInput} to
+ *                                   determine the user's intention to run a command corresponding
+ *                                   to this App instance.
+ * @param {string} [options.version] The app's version. It will be used to document the app's help.
+ * @param {onReply} onReply          A function that allows the App to communicate with the end user.
+ *                                   When the App needs to show an output, the onReply function will
+ *                                   be executed.
+ * @param {Command[]} [commands]     An array of commands that will immediately be bound to the
+ *                                   app. Additional commands can be later bound using
+ *                                   {@link addCommand}.
  *
  * @example
  * const Clapp = require('clapp');
@@ -51,30 +60,6 @@ var App = function () {
 
 		_classCallCheck(this, App);
 
-		/**
-   * @typedef {Object} appOptions
-   *
-   * An object that contains the options needed to construct the App instance.
-   *
-   * @property {string} name The app's name. This isn't necessarily the same as the prefix.
-   *                         Its only purpose is to be shown to the user in case of syntax
-   *                         error, or when they request the app help.
-   * @property {string} desc A description of what the app does. This will be used to document
-   *                         the app's help.
-   * @property {string} prefix The app's prefix. It will be used by {@link parseInput} to
-   *                           determine the user's intention to run a command corresponding
-   *                           to this App instance.
-   * @property {string} [version] The app's version. It will be used to document the app's
-   *                              help.
-   *
-   * @example
-   * var appOptions = {
-   * 	name: 'Test App',
-   * 	desc: 'An app created with Clapp!',
-   * 	prefix: '/testapp', // Commands will have this structure: /testapp foo --bar
-   * 	version: '1.2.0'
-   * };
-   */
 		if (typeof options === 'undefined' || typeof options.name !== 'string' || typeof options.desc !== 'string' || typeof options.prefix !== 'string' || typeof onReply !== 'function' || !Array.isArray(commands)) throw new Error('Wrong options passed into the Clapp constructor. ' + 'Please refer to the documentation.');
 
 		this.name = options.name;
@@ -248,11 +233,25 @@ var App = function () {
        * 	}
        * }
        */
-						var response = this.commands[argv._[0]].fn(final_argv, context);
-						if (typeof response === 'string') {
-							this.reply(response, context);
-						} else if ((typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && (typeof response.message !== 'undefined' || typeof response.context !== 'undefined')) {
-							this.reply(response.message, response.context);
+						if (!this.commands[argv._[0]].async) {
+							var response = this.commands[argv._[0]].fn(final_argv, context);
+
+							if (typeof response === 'string') {
+								this.reply(response, context);
+							} else if ((typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && (typeof response.message !== 'undefined' || typeof response.context !== 'undefined')) {
+								this.reply(response.message, response.context);
+							}
+						} else {
+							var self = this;
+							this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
+								if (typeof response === 'string') {
+									if (typeof newContext !== 'undefined') {
+										self.reply(response, newContext);
+									} else {
+										self.reply(response, context);
+									}
+								}
+							});
 						}
 					}
 				}
