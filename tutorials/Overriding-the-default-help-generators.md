@@ -10,8 +10,8 @@ In order to extend command, declare your own class, and call `super` indide the 
 
 ```js
 class MyCommand extends Clapp.Command {
-	constructor(name, fn, desc = '', args = [], flags = []) {
-		super(name, fn, desc, args, flags);
+	constructor(name, fn, desc = '', args = [], flags = [], async = false) {
+		super(name, fn, desc, args, flags, async);
 	}
 }
 ```
@@ -40,44 +40,72 @@ class MyCommand extends Clapp.Command {
 You could start from copying the original `_getHelp()` from the source code, and then change it:
 
 ```js
+/**
+ * Returns the command specific help
+ *
+ * @param {App} app We need it to access the parent app info.
+ * @private
+ */
 _getHelp(app) {
+	const LINE_WIDTH = 100;
+
 	var r = str.help_usage + ' ' + app.prefix + ' ' + this.name;
 
 	// Add every argument to the usage (Only if there are arguments)
 	if (Object.keys(this.args).length > 0) {
-		var args_data = [];
+		var args_table = new Table({
+			chars: {
+				'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': '', 'bottom': '' ,
+				'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': '', 'left': '' ,
+				'left-mid': '' , 'mid': '' , 'mid-mid': '', 'right': '' , 'right-mid': '' ,
+				'middle': ''
+			},
+			head: ['Argument', 'Description', 'Default'],
+			colWidths: [0.20*LINE_WIDTH, 0.35*LINE_WIDTH, 0.25*LINE_WIDTH],
+			wordWrap: true
+		});
 		for (var i in this.args) {
 			r += this.args[i].required ? ' (' + i + ')' : ' [' + i + ']';
-			args_data.push({
-				'Argument': i,
-				'Description': typeof this.args[i].desc !== 'undefined' ?
-					           this.args[i].desc : '',
-				'Default': typeof this.args[i].default !== 'undefined' ?
-					       this.args[i].default : ''
-			});
+			args_table.push([
+				i,
+				typeof this.args[i].desc !== 'undefined' ?
+					   this.args[i].desc : '',
+				typeof this.args[i].default !== 'undefined' ?
+					   this.args[i].default : ''
+			]);
 		}
 	}
 
 	r += '\n' + this.desc;
 
 	if (Object.keys(this.args).length > 0)
-		r += '\n\n' + str.help_av_args + ':\n\n' + printTable(args_data);
+		r += '\n\n' + str.help_av_args + ':\n\n' + args_table.toString();
 
 	// Add every flag, only if there are flags to add
 	if (Object.keys(this.flags).length > 0) {
-		var flags_data = [];
+		var flags_table = new Table({
+			chars: {
+				'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': '', 'bottom': '' ,
+				'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': '', 'left': '' ,
+				'left-mid': '' , 'mid': '' , 'mid-mid': '', 'right': '' , 'right-mid': '' ,
+				'middle': ''
+			},
+			head: ['Option', 'Description', 'Default'],
+			colWidths: [0.20*LINE_WIDTH, 0.35*LINE_WIDTH, 0.25*LINE_WIDTH],
+			wordWrap: true
+		});
 		for (i in this.flags) {
-			flags_data.push({
-				'Option': (typeof this.flags[i].alias !== 'undefined' ?
-				        '-' + this.flags[i].alias + ', ' : '') + '--' + i,
-				'Description': typeof this.flags[i].desc !== 'undefined' ?
+			flags_table.push([
+				(typeof this.flags[i].alias !== 'undefined' ?
+						'-' + this.flags[i].alias + ', ' : '') + '--' + i,
+				typeof this.flags[i].desc !== 'undefined' ?
 					this.flags[i].desc : '',
-				'Default': typeof this.flags[i].default !== 'undefined' ?
+				typeof this.flags[i].default !== 'undefined' ?
 					this.flags[i].default : ''
-			});
+			]);
 		}
 
-		r += '\n\n' + str.help_av_options + ':\n\n' + printTable(flags_data);
+		r += '\n\n' + str.help_av_options + ':\n\n' + flags_table.toString();
 	}
 
 	if (Object.keys(this.args).length > 0)
@@ -87,10 +115,12 @@ _getHelp(app) {
 }
 ```
 
-Note that the `str` object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the [printTable](https://www.npmjs.com/package/tableprinter) function comes already as a dependency with Clapp, so fel free to use it with:
+Note that the `str` object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the [cli-table2](https://www.npmjs
+.com/package/cli-table2) function comes already as a dependency with Clapp, so fel free to use it
+ with:
 
 ```js
-const printTable = require('tableprinter');
+const Table = require('cli-table2');
 ```
 
 ## Extending App
@@ -112,7 +142,14 @@ class MyApp extends Clapp.App {
 Here's the source from `_getHelp()`, in case you want to start from there:
 
 ```js
+/**
+ * Returns the global app help
+ *
+ * @private
+ */
 _getHelp() {
+	const LINE_WIDTH = 100;
+
 	var r =
 		this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' +
 		this.desc + '\n\n' +
@@ -123,16 +160,23 @@ _getHelp() {
 	;
 
 	// Command list
-	var data = [];
+	var table = new Table({
+		chars: {
+			'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': '', 'bottom': '' ,
+			'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': '', 'left': '' ,
+			'left-mid': '' , 'mid': '' , 'mid-mid': '', 'right': '' , 'right-mid': '' ,
+			'middle': ''
+		},
+		colWidths: [0.1*LINE_WIDTH, 0.9*LINE_WIDTH],
+		wordWrap: true
+	});
+
 	for (var i in this.commands) {
-		data.push({
-			'Command': i,
-			'Description': this.commands[i].desc
-		});
+		table.push([i, this.commands[i].desc]);
 	}
 
 	r +=
-		printTable(data) + '\n\n' +
+		table.toString() + '\n\n' +
 		str.help_further_help + this.prefix + ' ' + str.help_command + ' --help'
 	;
 

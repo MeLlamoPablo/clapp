@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Defining-the-command-function - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Tutorial: Defining-the-command-function</h1>
+    
+
+    <section>
+
+<header>
+    
+
+    <h2>Defining-the-command-function</h2>
+</header>
+
+<article>
+    <h1>Defining the command function</h1><p>The documentation shows a very basic example of what a command is: when the user executes <code>foo</code>, <code>console.log('foo was executed');</code>. However, there's two parameters that Clapp passes back to your command:</p>
+<ul>
+<li><code>argv</code> contains the arguments and flags, and</li>
+<li><code>context</code> contains your own information. See &quot;working-with-contexts&quot; for further info about contexts.</li>
+</ul>
+<h2>The <code>argv</code> object</h2><p>The <code>argv</code> object contains two children:</p>
+<ul>
+<li><code>argv.args</code>, and</li>
+<li><code>argv.flags</code>.</li>
+</ul>
+<p>Both objects contain children objects with your data. So if you define the following flag:</p>
+<pre class="prettyprint source lang-javascript"><code>var flag = {
+    name: 'limit',
+    desc: 'The number of items that will be shown. Can\'t be higher than 50',
+    type: 'number',
+    alias: 'l',
+    default: 10
+}</code></pre><p>And the user runs:</p>
+<pre class="prettyprint source lang-javascript"><code>app.parseInput('/testapp foo -l 25');</code></pre><p>Then you get:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    console.log(argv.flags.limit); // 25
+}</code></pre><p>If the user ran:</p>
+<pre class="prettyprint source lang-javascript"><code>app.parseInput('/testapp foo');</code></pre><p>Then you'd get:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    console.log(argv.flags.limit); // 10, because it's the default value.
+}</code></pre><h2>Returning data</h2><p>Generally, you want to return a message to the user with the feedback about the operation they just did.</p>
+<h4>Returning a message</h4><p>In your command function, you can <code>return</code> a <code>string</code> that will be redirected to your <code>onReply</code> function (in the <code>msg</code> parameter), using the same context that was passed into your command function. For instance:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    if (argv.flags.limit &lt; 50) {
+        doTheThing();
+        return 'Operation successful!';
+    } else {
+        return 'The limit can\'t be higher than 50, sorry!';
+    }
+}</code></pre><h4>Modifying the context</h4><p>If you also need to pass your own data to your <code>onReply</code> function, you can modify the context, and <code>return</code> an <code>object</code> containing two properties: <code>message</code> and <code>context</code>. For instance:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    if (argv.flags.limit &lt; 50) {
+        doTheThing();
+        return {
+            message: 'Operation successful!',
+            context: {
+                operation_complete: true
+            }
+        };
+    } else {
+        return {
+            message: 'The limit can\'t be higher than 50, sorry!',
+            context: {
+                operation_complete: false
+            }
+        };
+    }
+}</code></pre><p>You may omit the <code>message</code> param, though it is not recommended. If you do it, your <code>onReply</code>'s <code>msg</code> will be <code>undefined</code>, wich may cause unexpected behaviour. So you should probably prepare your function for that scenario.</p>
+<p>To learn more about contexts, see <a href="tutorial-Working-with-contexts.html">Working with contexts</a>.</p>
+<h4>Not doing anything</h4><p>If you don't want to send a message, just return something that is neither <code>string</code> nor <code>object</code> or don't return nothing at all.</p>
+<h2>Asynchronous functions</h2><p>In some cases, you might need your command's <code>fn</code> to behave asynchronously. In order to do so, first you need to set the <code>async</code> parameter to <code>true</code>:</p>
+<pre class="prettyprint source lang-javascript"><code>new Clapp.Command(
+    'foo',
+    // [...]
+    true // Set the fn to be async
+);</code></pre><p>Now, the data returned with the <code>return</code> statement will be ignored. Instead, your <code>fn</code> will receive three parameters: <code>argv</code>, <code>context</code>, and <code>callback</code>:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context, callback) {
+    doTheThing().then(() => {
+        callback();
+    });
+}</code></pre><p>When you call the <code>callback</code>, Clapp will understand that the command execution is over. Of course, you can use the <code>callback</code> to pass your response and modify the context:</p>
+<h4>Returning a message</h4><p><code>callback</code> accepts a string as its first parameter: the message that will be redirected to your <code>onReply</code> function. Be careful, it can only be a string, other data types won't trigger <code>onReply</code>.</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context, callback) {
+    doTheThing().then(thing => {
+        callback(thing.toString());
+    });
+}</code></pre><h4>Modifying the context</h4><p><code>callback</code> accepts the modified <code>context</code> as its second parameter. If you don't pass anything, the current <code>context</code> will also be redirected to <code>onReply</code>.</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context, callback) {
+    doTheThing().then((foo, bar) => {
+        context.bar = bar;
+        callback(foo.toString(), context);
+    });
+}</code></pre>
+</article>
+
+</section>
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Tue Oct 18 2016 21:35:37 GMT+0200 (Hora de verano romance) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

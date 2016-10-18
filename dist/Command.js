@@ -4,7 +4,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var printTable = require('tableprinter');
+var Table = require('cli-table2');
 
 var str = require('./strings/en.js');
 
@@ -187,37 +187,51 @@ var Command = function () {
 	_createClass(Command, [{
 		key: '_getHelp',
 		value: function _getHelp(app) {
+			var LINE_WIDTH = 100;
+
 			var r = str.help_usage + ' ' + app.prefix + ' ' + this.name;
 
 			// Add every argument to the usage (Only if there are arguments)
 			if (Object.keys(this.args).length > 0) {
-				var args_data = [];
+				var args_table = new Table({
+					chars: {
+						'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
+						'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
+						'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
+						'middle': ''
+					},
+					head: ['Argument', 'Description', 'Default'],
+					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
+					wordWrap: true
+				});
 				for (var i in this.args) {
 					r += this.args[i].required ? ' (' + i + ')' : ' [' + i + ']';
-					args_data.push({
-						'Argument': i,
-						'Description': typeof this.args[i].desc !== 'undefined' ? this.args[i].desc : '',
-						'Default': typeof this.args[i].default !== 'undefined' ? this.args[i].default : ''
-					});
+					args_table.push([i, typeof this.args[i].desc !== 'undefined' ? this.args[i].desc : '', typeof this.args[i].default !== 'undefined' ? this.args[i].default : '']);
 				}
 			}
 
 			r += '\n' + this.desc;
 
-			if (Object.keys(this.args).length > 0) r += '\n\n' + str.help_av_args + ':\n\n' + printTable(args_data);
+			if (Object.keys(this.args).length > 0) r += '\n\n' + str.help_av_args + ':\n\n' + args_table.toString();
 
 			// Add every flag, only if there are flags to add
 			if (Object.keys(this.flags).length > 0) {
-				var flags_data = [];
+				var flags_table = new Table({
+					chars: {
+						'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
+						'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
+						'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
+						'middle': ''
+					},
+					head: ['Option', 'Description', 'Default'],
+					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
+					wordWrap: true
+				});
 				for (i in this.flags) {
-					flags_data.push({
-						'Option': (typeof this.flags[i].alias !== 'undefined' ? '-' + this.flags[i].alias + ', ' : '') + '--' + i,
-						'Description': typeof this.flags[i].desc !== 'undefined' ? this.flags[i].desc : '',
-						'Default': typeof this.flags[i].default !== 'undefined' ? this.flags[i].default : ''
-					});
+					flags_table.push([(typeof this.flags[i].alias !== 'undefined' ? '-' + this.flags[i].alias + ', ' : '') + '--' + i, typeof this.flags[i].desc !== 'undefined' ? this.flags[i].desc : '', typeof this.flags[i].default !== 'undefined' ? this.flags[i].default : '']);
 				}
 
-				r += '\n\n' + str.help_av_options + ':\n\n' + printTable(flags_data);
+				r += '\n\n' + str.help_av_options + ':\n\n' + flags_table.toString();
 			}
 
 			if (Object.keys(this.args).length > 0) r += '\n\n' + str.help_args_required_optional;

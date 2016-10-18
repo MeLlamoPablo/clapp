@@ -7,7 +7,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var parseSentence = require('minimist-string');
-var printTable = require('tableprinter');
+var Table = require('cli-table2');
 
 var Command = require('./Command.js');
 var str = require('./strings/en.js');
@@ -286,18 +286,27 @@ var App = function () {
 	}, {
 		key: '_getHelp',
 		value: function _getHelp() {
+			var LINE_WIDTH = 100;
+
 			var r = this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' + this.desc + '\n\n' + str.help_usage + this.prefix + ' ' + str.help_command + '\n\n' + str.help_cmd_list + '\n\n';
 
 			// Command list
-			var data = [];
+			var table = new Table({
+				chars: {
+					'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
+					'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
+					'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
+					'middle': ''
+				},
+				colWidths: [0.1 * LINE_WIDTH, 0.9 * LINE_WIDTH],
+				wordWrap: true
+			});
+
 			for (var i in this.commands) {
-				data.push({
-					'Command': i,
-					'Description': this.commands[i].desc
-				});
+				table.push([i, this.commands[i].desc]);
 			}
 
-			r += printTable(data) + '\n\n' + str.help_further_help + this.prefix + ' ' + str.help_command + ' --help';
+			r += table.toString() + '\n\n' + str.help_further_help + this.prefix + ' ' + str.help_command + ' --help';
 
 			return r;
 		}

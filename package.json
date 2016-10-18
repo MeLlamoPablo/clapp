@@ -1,6 +1,6 @@
 {
   "name": "clapp",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A tool for building command line apps that don't aren't necessarily built for the command line.",
   "homepage": "http://mellamopablo.github.io/clapp/latest.html",
   "author": {
@@ -13,7 +13,10 @@
   ],
   "main": "dist/index.js",
   "keywords": [
-    "cli", "command line", "parser", "app"
+    "cli",
+    "command line",
+    "parser",
+    "app"
   ],
   "devDependencies": {
     "babel-core": "^6.11.4",
@@ -44,7 +47,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "minimist-string": "^1.0.0",
-    "tableprinter": "^1.0.0"
+    "cli-table2": "^0.2.0",
+    "minimist-string": "^1.0.0"
   }
 }
