@@ -1,6 +1,6 @@
 {
   "name": "clapp",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A tool for building command line apps that don't aren't necessarily built for the command line.",
   "homepage": "http://mellamopablo.github.io/clapp/latest.html",
   "author": {
@@ -48,6 +48,6 @@
   "license": "Apache-2.0",
   "dependencies": {
     "cli-table2": "^0.2.0",
-    "minimist-string": "^1.0.0"
+    "minimist-string": "^1.0.1"
   }
 }
