@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>index.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">index.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+const parseSentence   = require('minimist-string');
+const Table           = require('cli-table2');
+
+const Command         = require('./Command.js');
+const str             = require('./strings/en.js');
+
+/**
+ * A command line app. An App can parse an input with {@link parseInput}, and if it's correct (i.e:
+ * refers to an existing command and provides the required options), the command will be executed.
+ * An App needs an onReply function to be able to communicate with the user.
+ *
+ * @class App
+ * @param {object} options
+ * @param {string} options.name      The app's name. This isn't necessarily the same as the prefix.
+ *                                   Its only purpose is to be shown to the user in case of syntax
+ *                                   error, or when they request the app help.
+ * @param {string} options.desc      A description of what the app does. This will be used to
+ *                                   document the app's help.
+ * @param {string} options.prefix    The app's prefix. It will be used by {@link parseInput} to
+ *                                   determine the user's intention to run a command corresponding
+ *                                   to this App instance.
+ * @param {string} [options.version] The app's version. It will be used to document the app's help.
+ * @param {onReply} onReply          A function that allows the App to communicate with the end user.
+ *                                   When the App needs to show an output, the onReply function will
+ *                                   be executed.
+ * @param {Command[]} [commands]     An array of commands that will immediately be bound to the
+ *                                   app. Additional commands can be later bound using
+ *                                   {@link addCommand}.
+ *
+ * @example
+ * const Clapp = require('clapp');
+ * var myApp = new Clapp.App(
+ * 	{
+ * 		name: 'Test App',
+ * 		desc: 'An app created with Clapp!',
+ * 		prefix: '/testapp', // Commands will have this structure: /testapp foo --bar
+ * 		version: '1.2.0'
+ * 	},
+ * 	function(msg, context) {
+ * 		// Called when the App shows an output
+ * 		console.log(msg);
+ * 	},
+ * 	[myCommand1, myCommand2]
+ * );
+ *
+ * myApp.addCommand(myCommand3);
+ */
+class App {
+
+	constructor(options, onReply, commands = []) {
+		if (
+			typeof options        === 'undefined' ||
+			typeof options.name   !== 'string'    ||
+			typeof options.desc   !== 'string'    ||
+			typeof options.prefix !== 'string'    ||
+			typeof onReply        !== 'function'  ||
+			!Array.isArray(commands)
+		) throw new Error('Wrong options passed into the Clapp constructor. ' +
+		                   'Please refer to the documentation.');
+
+		this.name = options.name;
+		this.desc = options.desc;
+		this.prefix = options.prefix;
+		this.version = typeof options.version === 'string' ? options.version : undefined;
+
+		/**
+		 * @typedef {function} onReply
+		 *
+		 * The onReply function gets called every time Clapp needs to show output to the user. It
+		 * receives two parameters: msg and context. The msg parameter is the message that you need
+		 * to show to the user. It can be the generated command help, if the user requests it, an
+		 * error message if the user doesn't pass a valid cli sentence, or a message returned by
+		 * the command function.
+		 *
+		 * The context is what you defined, for more information see
+		 * {@tutorial Working-with-contexts}
+		 *
+		 * @example
+		 * function(msg, context) {
+		 * 	createMessage(msg, context.user);
+		 * }
+		 */
+		this.reply = onReply;
+
+		this.commands = {};
+		for (var i = 0; i &lt; commands.length; i++) {
+			this.addCommand(commands[i]);
+		}
+	}
+
+	/**
+	 * Binds a command to the app so that the command can be executed from
+	 * [parseInput]{@link App#parseInput}.
+	 *
+	 * @param {Command} cmd The command to bind.
+	 *
+	 * @example
+	 * app.addCommand(new Clapp.Command(
+	 * 	'foo',
+	 * 	function(argv, context) {
+	 * 		console.log('foo was executed');
+	 * 	}
+	 * )):
+	 */
+	addCommand(cmd) {
+		if(!(cmd instanceof Command))
+			throw new Error('Error adding a command to ' + name +
+				'. Provided parameter is not a command. Please refer to the documentation.');
+
+		this.commands[cmd.name] = cmd;
+	}
+
+	/**
+	 * Parses an input CLI sentence (See [isCliSentence]{@link App#isCliSentence}) and performs
+	 * actions accordingly:
+	 * if the sentence is a valid command, that command is executed. If it is an invalid CLI
+	 * sentence, the user is warned about the problem. If the user passes the "--help" flag, they
+	 * are prompted with the app general help, or the command specific help.
+	 *
+	 * Please note that the input is not sanitized. It is your responsibility to do so. It is also
+	 * reccommended that you make sure that the input is a CLI sentence (valid or not) by using
+	 * [isCliSentence]{@link App#isCliSentence}. Otherwise, Clapp will log an error.
+	 *
+	 * @param {string} input A CLI sentence. See [isCliSentence]{@link App#isCliSentence}.
+	 * @param {*} context The context to retrieve later. See {@tutorial Working-with-contexts}.
+	 *
+	 * @example
+	 * app.parseInput('/testapp foo');        // Executes `foo`
+	 * app.parseInput('/testapp foo --bar');  // Executes `foo` passing the --bar flag
+	 * app.parseInput('/testapp foo --help'); // Shows the command help for `foo`
+	 * app.parseInput('/testapp --help');     // Shows the app help
+	 * app.parseInput('Not a CLI sentence');  // Does nothing, logs a warning.
+	 */
+	parseInput(input, context) {
+		if (typeof input !== 'string')
+			throw new Error('Input must be a string! Don\'t forget to sanitize it.');
+
+		if (!this.isCliSentence(input)) {
+			console.log('[CLAPP] Warning: attempted to parse the input "' + input + '", ' +
+				        'but it is not a CLI sentence (doesn\'t begin with the app prefix).');
+			return false;
+		}
+
+		var argv = parseSentence(input.replace(this.prefix + ' ', ''));
+
+		// Find whether or not the requested command exists
+		var cmd = this.commands[argv._[0]];
+		if (typeof cmd === 'undefined') {
+			// The command doesn't exist. Four scenarios possible:
+			if (argv.help || input === this.prefix) {
+				// The help flag was passed OR the user typed just the command prefix.
+				// Show app help.
+				this.reply(this._getHelp(), context);
+			} else if (argv.version) {
+				// The user asked for the app version
+				this.reply('v' + this.version, context);
+			}else {
+				// The user made a mistake. Let them know.
+				this.reply(str.err + str.err_unknown_command.replace('%CMD%', argv._[0])
+				       + ' ' + str.err_type_help.replace('%PREFIX%', this.prefix), context);
+			}
+		} else {
+			// The command exists. Three scenarios possible:
+			if (argv.help) {
+				// The user requested the command specific help.
+				this.reply(cmd._getHelp(this), context);
+			} else {
+				// We're good to go. Find whether or not it supplies every required argument.
+				var unfulfilled_args = {};
+				var j = 1; // 1 because argv._[0] is the command name
+				for (var i in cmd.args) {
+					if (cmd.args[i].required &amp;&amp; typeof argv._[j] === 'undefined')
+						unfulfilled_args[i] = cmd.args[i];
+				}
+
+				if(Object.keys(unfulfilled_args).length > 0) {
+					var r = str.err + str.err_unfulfilled_args + '\n';
+					for (i in unfulfilled_args) {
+						r += i + '\n';
+					}
+					r += '\n' + str.err_type_help.replace(
+						'%PREFIX%', this.prefix + ' ' + argv._[0]
+					);
+
+					this.reply(r, context);
+				} else {
+					// Everything's good.
+					var final_argv = {args: {}, flags: {}};
+
+					// Give values to every argument
+					j = 1;
+					for (i in cmd.args) {
+						final_argv.args[i] = argv._[j];
+
+						// If the arg wasn't supplied and it has a default value, show it
+						if (typeof final_argv.args[i] === 'undefined'
+						    &amp;&amp; typeof cmd.args[i].default !== 'undefined')
+							final_argv.args[i] = cmd.args[i].default;
+
+						j++;
+					}
+
+					// Give values to every flag
+					for (i in cmd.flags) {
+						if (typeof argv[i] === 'undefined') {
+							// The user didn't specify the flag, but might have specified the alias
+							final_argv.flags[i] = typeof argv[cmd.flags[i].alias] === 'undefined' ?
+							                      cmd.flags[i].default : argv[cmd.flags[i].alias];
+						} else {
+							// The user specified the flag
+							final_argv.flags[i] = argv[i];
+						}
+					}
+
+					/**
+					 * @typedef {Object} argv
+					 *
+					 * For more information, see {@tutorial Defining-the-command-function}.
+					 *
+					 * @property {Object} args  An object containning every argument.
+					 * @property {Object} flags An object containing every flag.
+					 *
+					 * @example
+					 *
+					 * {
+					 * 	args: {
+					 * 		myRequiredArg: 'foo',
+					 * 		myOptionalArgWithDefaultValue: 'bar',
+					 * 	},
+					 * 	flags: {
+					 * 		limit: 20,
+					 * 		debug: true
+					 * 	}
+					 * }
+					 */
+					if(!this.commands[argv._[0]].async) {
+						var response = this.commands[argv._[0]].fn(final_argv, context);
+
+						if (typeof response === 'string') {
+							this.reply(response, context);
+						} else if (typeof response === 'object' &amp;&amp;
+							(
+								typeof response.message !== 'undefined' ||
+								typeof response.context !== 'undefined'
+							)) {
+							this.reply(response.message, response.context);
+						}
+					} else {
+						var self = this;
+						this.commands[argv._[0]].fn(
+							final_argv,
+							context,
+							function cb(response, newContext) {
+								if (typeof response === 'string') {
+									if (typeof newContext !== 'undefined') {
+										self.reply(response, newContext);
+									} else {
+										self.reply(response, context);
+									}
+								}
+							}
+						);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Validates an input to find out whether or not it is a CLI sentence.
+	 *
+	 * A CLI sentence (valid or not) is a string that begins with the app prefix. A valid CLI
+	 * sentence is a CLI sentence that does not result in an error upon parsing.
+	 *
+	 * @param {string} sentence The string to test.
+	 *
+	 * @example
+	 * app.isCliSentence('/testapp foo --bar'); // True
+	 * app.isCliSentence('Hello, world!')       // False
+	 */
+	isCliSentence(sentence) {
+		return sentence === this.prefix ||
+		       sentence.substring(0, this.prefix.length + 1) === (this.prefix + ' ');
+	}
+
+	/**
+	 * Returns the global app help
+	 *
+	 * @private
+	 */
+	_getHelp() {
+		const LINE_WIDTH = 100;
+
+		var r =
+			this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' +
+			this.desc + '\n\n' +
+
+			str.help_usage + this.prefix + ' ' + str.help_command + '\n\n' +
+
+			str.help_cmd_list + '\n\n'
+		;
+
+		// Command list
+		var table = new Table({
+			chars: {
+				'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': '', 'bottom': '' ,
+				'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': '', 'left': '' ,
+				'left-mid': '' , 'mid': '' , 'mid-mid': '', 'right': '' , 'right-mid': '' ,
+				'middle': ''
+			},
+			colWidths: [0.1*LINE_WIDTH, 0.9*LINE_WIDTH],
+			wordWrap: true
+		});
+
+		for (var i in this.commands) {
+			table.push([i, this.commands[i].desc]);
+		}
+
+		r +=
+			table.toString() + '\n\n' +
+			str.help_further_help + this.prefix + ' ' + str.help_command + ' --help'
+		;
+
+		return r;
+	}
+}
+
+module.exports = {
+	App: App,
+	Command: Command
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Wed Oct 26 2016 19:43:57 GMT+0200 (Hora de verano romance) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

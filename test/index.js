@@ -534,6 +534,53 @@ describe('Clapp.Command', function(){
 		expect(thrown).to.eql(['a', 'b']);
 	});
 
+	it('should throw an Error when given an invalid argument or flag type', function(){
+		var thrown = [];
+
+		try {
+			new Clapp.Command('foo', function(){}, 'desc', [
+				{
+					name: 'testarg',
+					desc: 'A test argument',
+					required: true,
+					type: 'NullPointerException'
+				}
+			]);
+		} catch(e) {
+			thrown.push('a');
+		}
+
+		try {
+			new Clapp.Command('foo', function(){}, 'desc', [], [
+				{
+					name: 'testflag',
+					desc: 'A test flag',
+					alias: 't',
+					type: 'meme',
+					default: false
+				}
+			]);
+		} catch(e) {
+			thrown.push('b');
+		}
+
+		try {
+			new Clapp.Command('foo', function(){}, 'desc', [], [
+				{
+					name: 'testflag',
+					desc: 'A test flag',
+					alias: 't',
+					type: 'boolean',
+					default: false
+				}
+			]);
+		} catch(e) {
+			thrown.push('c');
+		}
+
+		expect(thrown).to.eql(['a', 'b']);
+	});
+
 	it('should throw an Error when given an alias with multiple characters', function(){
 		var thrown = [];
 
