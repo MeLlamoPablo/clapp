@@ -1,11 +1,12 @@
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Table = require('cli-table2');
-
 var str = require('./strings/en.js');
 
 /**
@@ -82,22 +83,24 @@ var Command = function () {
    * [App.isCliSentence]{@link App#isCliSentence}) "/testapp foo bar", "bar" would be the
    * value of the first argument.
    *
-   * @property {string} name The argument name. This options has two purposes: to document the
-   *                         command help, and to identify the option in the "argv.args"
-   *                         variable passed back to the command function.
-   * @property {string} [desc] A description about what the argument is and what information
-   *                           the user is expected to supply. It is used to show the
-   *                           command help to the user.
-   * @property {string} type The argument data type. Typically, this will be "string" or
-   *                         "number". Clapp won't complain about other data types, but using
-   *                         them will probably cause unexpected behaviour.
+   * @property {string}  name             The argument name. This options has two
+   *                                      purposes: to document the command help, and to
+   *                                      identify the option in the "argv.args" variable
+   *                                      passed back to the command function.
+   * @property {string}  [desc]           A description about what the argument is and
+   *                                      what information the user is expected to supply.
+   *                                      It is used to show the command help to the user.
+   * @property {string}  type             The argument data type, either "string" or "number".
    * @property {boolean} [required=false] Whether or not the argument is required for the
    *                                      command to work. If the user fails to supply every
    *                                      required argument, Clapp will warn them about the
    *                                      problem and redirect them to the command help.
-   * @property {*} [default] A default value that will be passed into the "argv.args" if the
-   *                         user does not supply a value. This only works if "required" is
-   *                         set to false; it has no effect otherwise.
+   * @property {string|number} [default]  A default value that will be passed into the
+   *                                      "argv.args" if the user does not supply a value.
+   *                                      This only works if "required" is set to false;
+   *                                      it has no effect otherwise. One of "required" or
+   *                                      "default" must be supplied. Not supplying either
+   *                                      would result in an error.
    *
    * @example
    * var arg = {
@@ -114,14 +117,28 @@ var Command = function () {
 
 			if (typeof args[i].type !== 'string') throw new Error('Error creating command ' + name + ': unspecified argument type. Please refer to the documentation.');
 
+			if (args[i].type !== "string" && args[i].type !== "number") {
+				throw new Error('Error creating command ' + name + ': argument types can only be string or number. Please refer to the' + ' documentation.');
+			}
+
 			this.args[args[i].name] = {
 				required: typeof args[i].required === 'boolean' ? args[i].required : false,
 				desc: typeof args[i].desc === 'undefined' ? undefined : args[i].desc,
 				type: args[i].type
 			};
 
-			// If the argument is not required, it may have a default value
-			if (!this.args[args[i].name].required && typeof args[i].default !== 'undefined') this.args[args[i].name].default = args[i].default;
+			// If the argument is not required, it must have a default value
+			if (!this.args[args[i].name].required && typeof args[i].default !== 'undefined') {
+				if (_typeof(args[i].default) !== args[i].type) {
+					throw new Error('Error creating command ' + name + ': argument default value for argument ' + args[i].name + ' does not' + ' match its data type. Please refer to the documentation.');
+				}
+
+				this.args[args[i].name].default = args[i].default;
+			} else if (
+			// If it doesn't have a default value, then show an error.
+			!this.args[args[i].name].required && typeof args[i].default === 'undefined') {
+				throw new Error('Error creating command ' + name + ': argument ' + args[i].name + ' is not required, but no default value' + ' was provided. Please refer to the documentation.');
+			}
 		}
 
 		/**
@@ -133,20 +150,28 @@ var Command = function () {
    * [App.isCliSentence]{@link App#isCliSentence}) "/testapp foo --bar", "bar" would be the
    * flag the user passed, and its value would be "true".
    *
-   * @property {string} name The flag name. This options has two purposes: to document the
-   *                         command help, and to identify the option in the "argv.flags"
-   *                         variable passed back to the command function.
-   * @property {string} [desc] A description about what the flag is and what information
-   *                           the user is expected to supply. It is used to show the
-   *                           command help to the user.
-   * @property {string} type The flag data type. Typically, this will be "boolean", "string"
-   *                          or "number". Clapp won't complain about other data types, but
-   *                          using them will probably cause unexpected behaviour.
-   * @property {*} [default] A default value that will be passed into the "argv.flags" if the
-   *                         user does not supply a value.
-   * @property {string} [alias] A string of only one character containing the alias of the
-   *                            flag. If the alias of "limit" is "l", then "--limit=15" will
-   *                            have the same effect as "-l 15".
+   * @property {string}                name      The flag name. This options has two
+   *                                             purposes: to document the command help,
+   *                                             and to identify the option in the
+   *                                             "argv.flags" variable passed back to the
+   *                                             command function.
+   * @property {string}                [desc]    A description about what the flag is and
+   *                                             what information the user is expected to
+   *                                             supply. It is used to show the command
+   *                                             help to the user.
+   * @property {string}                type      The flag data type, either "string",
+   *                                             "number" or "boolean".
+   * @property {string|number|boolean} [default] A default value that will be passed into the
+   *                                             "argv.flags" if the user does not supply a
+   *                                             value. While this is optional, it is
+   *                                             stronlgy encouraged that you supply it.
+   *                                             If you do not, when the user doesn't
+   *                                             provide the flag's value, you will get
+   *                                             undefined.
+   * @property {string}                [alias]   A string of only one character containing
+   *                                             the alias of the flag. If the alias of
+   *                                             "limit" is "l", then "--limit=15" will
+   *                                             have the same effect as "-l 15".
    *
    * @example
    * var flag = {
@@ -163,7 +188,15 @@ var Command = function () {
 
 			if (typeof flags[i].type !== 'string') throw new Error('Error creating command ' + name + ': unspecified flag type. Please refer to the documentation.');
 
+			if (flags[i].type !== "boolean" && flags[i].type !== "string" && flags[i].type !== "number") {
+				throw new Error('Error creating command ' + name + ': flag types can only be boolean, string or number. Please refer to the' + ' documentation.');
+			}
+
 			if (typeof flags[i].alias === 'string' && flags[i].alias.length !== 1) throw new Error('Error creating command ' + name + ': aliases can only be one character long.');
+
+			if (typeof flags[i].default !== 'undefined' && _typeof(flags[i].default) !== flags[i].type) {
+				throw new Error('Error creating command ' + name + ': flag default value for flag ' + args[i].name + ' does not' + ' match its data type. Please refer to the documentation.');
+			}
 
 			this.flags[flags[i].name] = {
 				type: flags[i].type,

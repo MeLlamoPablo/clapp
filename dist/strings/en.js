@@ -16,6 +16,7 @@ module.exports = {
 
 	err_unknown_command: 'unknown command %CMD%.',
 	err_unfulfilled_args: 'not every required argument was fulfilled. Missing arguments:',
+	err_type_mismatch: 'wrong types provided for the following options:',
 	err_type_help: 'Type %PREFIX% --help for help.'
 
 };

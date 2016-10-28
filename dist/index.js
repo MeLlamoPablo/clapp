@@ -171,11 +171,13 @@ var App = function () {
 					// The user requested the command specific help.
 					this.reply(cmd._getHelp(this), context);
 				} else {
-					// We're good to go. Find whether or not it supplies every required argument.
+					// Find whether or not it supplies every required argument.
 					var unfulfilled_args = {};
 					var j = 1; // 1 because argv._[0] is the command name
 					for (var i in cmd.args) {
 						if (cmd.args[i].required && typeof argv._[j] === 'undefined') unfulfilled_args[i] = cmd.args[i];
+
+						j++;
 					}
 
 					if (Object.keys(unfulfilled_args).length > 0) {
@@ -187,16 +189,23 @@ var App = function () {
 
 						this.reply(r, context);
 					} else {
-						// Everything's good.
 						var final_argv = { args: {}, flags: {} };
+						var errors = [];
 
 						// Give values to every argument
 						j = 1;
 						for (i in cmd.args) {
 							final_argv.args[i] = argv._[j];
 
-							// If the arg wasn't supplied and it has a default value, show it
+							// If the arg wasn't supplied and it has a default value, use it
 							if (typeof final_argv.args[i] === 'undefined' && typeof cmd.args[i].default !== 'undefined') final_argv.args[i] = cmd.args[i].default;
+
+							// Convert it to the correct type, and register errors.
+							final_argv.args[i] = App._convertType(final_argv.args[i], cmd.args[i].type);
+
+							if (_typeof(final_argv.args[i]) === "object") {
+								errors.push("Error on argument " + i + ": expected " + final_argv.args[i].expectedType + ", got " + final_argv.args[i].providedType + " instead.");
+							}
 
 							j++;
 						}
@@ -210,9 +219,19 @@ var App = function () {
 								// The user specified the flag
 								final_argv.flags[i] = argv[i];
 							}
+
+							// Convert it to the correct type, and register errors.
+							final_argv.flags[i] = App._convertType(final_argv.flags[i], cmd.flags[i].type);
+
+							if (_typeof(final_argv.flags[i]) === "object") {
+								errors.push("Error on flag " + i + ": expected " + final_argv.flags[i].expectedType + ", got " + final_argv.flags[i].providedType + " instead.");
+							}
 						}
 
-						/**
+						// If we don't have any errors, we can execute the command
+						var response;
+						if (errors.length === 0) {
+							/**
        * @typedef {Object} argv
        *
        * For more information, see {@tutorial Defining-the-command-function}.
@@ -233,25 +252,32 @@ var App = function () {
        * 	}
        * }
        */
-						if (!this.commands[argv._[0]].async) {
-							var response = this.commands[argv._[0]].fn(final_argv, context);
+							if (!this.commands[argv._[0]].async) {
+								response = this.commands[argv._[0]].fn(final_argv, context);
 
-							if (typeof response === 'string') {
-								this.reply(response, context);
-							} else if ((typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && (typeof response.message !== 'undefined' || typeof response.context !== 'undefined')) {
-								this.reply(response.message, response.context);
+								if (typeof response === 'string') {
+									this.reply(response, context);
+								} else if ((typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && (typeof response.message !== 'undefined' || typeof response.context !== 'undefined')) {
+									this.reply(response.message, response.context);
+								}
+							} else {
+								var self = this;
+								this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
+									if (typeof response === 'string') {
+										if (typeof newContext !== 'undefined') {
+											self.reply(response, newContext);
+										} else {
+											self.reply(response, context);
+										}
+									}
+								});
 							}
 						} else {
-							var self = this;
-							this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
-								if (typeof response === 'string') {
-									if (typeof newContext !== 'undefined') {
-										self.reply(response, newContext);
-									} else {
-										self.reply(response, context);
-									}
-								}
-							});
+							response = str.err + str.err_type_mismatch + "\n\n";
+							for (i = 0; i < errors.length; i++) {
+								response += errors[i] + "\n";
+							}
+							this.reply(response, context);
 						}
 					}
 				}
@@ -278,13 +304,27 @@ var App = function () {
 		}
 
 		/**
-   * Returns the global app help
-   *
+   * Converts an argument to the requested data type. Returns null if impossible.
+   * @param  {string|number|boolean} arg
+   * @param  {string}                toType
+   * @return {string|number|boolean|undefined|inputMismatchInfo}
+   *         Returns the desired value, or the error  information on fail.
    * @private
+   *
+   * @typedef  {object} inputMismatchInfo
+   * @property {string} providedType
+   * @property {string} expectedType
    */
 
 	}, {
 		key: '_getHelp',
+
+
+		/**
+   * Returns the global app help
+   *
+   * @private
+   */
 		value: function _getHelp() {
 			var LINE_WIDTH = 100;
 
@@ -309,6 +349,128 @@ var App = function () {
 			r += table.toString() + '\n\n' + str.help_further_help + this.prefix + ' ' + str.help_command + ' --help';
 
 			return r;
+		}
+	}], [{
+		key: '_convertType',
+		value: function _convertType(arg, toType) {
+			switch (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) {
+				case "string":
+
+					switch (toType) {
+						case "string":
+							// String asked, string provided. We're good to go.
+							return arg;
+							break;
+						case "number":
+							// Number asked, string provided.
+							// We don't even try to conver the string to a number, because if the user
+							// had provided a number, minimist would have given us a number, meaning
+							// that we wouldn't be here. So we have an error.
+							return {
+								providedType: "string",
+								expectedType: "number"
+							};
+							break;
+						case "boolean":
+							// Boolean asked, string provided.
+							// The common scenario for getting a boolean would be an user inputting
+							// something like this: --boolOption.
+							// But we also want this to work: --boolOption=true and --boolOption="true"
+							// So we try to convert the string to boolean:
+							switch (arg.toLowerCase()) {
+								case "true":
+									// We have a boolean with the value true. We're good to go.
+									return true;
+									break;
+								case "false":
+									// We have a boolean with the value false. We're good to go.
+									return false;
+									break;
+								default:
+									// The string can't be converted to boolean.
+									// We have an error.
+									return {
+										providedType: "string",
+										expectedType: "boolean"
+									};
+							}
+							break;
+						default:
+							// This shouldn't happen.
+							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
+					}
+
+					break;
+				case "number":
+
+					switch (toType) {
+						case "string":
+							// String asked, number provided.
+							// This is fine, the expected value could be a number string,
+							// so we just convert it.
+							return arg.toString();
+							break;
+						case "number":
+							// Number asked, number provided. We're good to go.
+							return arg;
+							break;
+						case "boolean":
+							// We want to accept the values of 0 and 1 as booleans, and reject the rest.
+							if (arg === 0) {
+								return false;
+							} else if (arg === 1) {
+								return true;
+							} else {
+								return {
+									providedType: "number",
+									expectedType: "boolean"
+								};
+							}
+							break;
+						default:
+							// This shouldn't happen.
+							console.log(arg);
+							console.log(toType);
+							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
+					}
+
+					break;
+				case "boolean":
+
+					// If a boolean is provided, it only makes sense to accept it if a boolean is asked
+					// because although true could be converted to 1 or string "true", it would only
+					// be confusing and cause unexpected behaviour.
+					switch (toType) {
+						case "string":
+							return {
+								providedType: "boolean",
+								expectedType: "string"
+							};
+							break;
+						case "number":
+							return {
+								providedType: "boolean",
+								expectedType: "number"
+							};
+							break;
+						case "boolean":
+							// We gucci
+							return arg;
+							break;
+						default:
+							// This shouldn't happen.
+							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
+					}
+
+					break;
+				case "undefined":
+					// This happens when a flag doesn't have a default value and the user doesn't
+					// provide it. In this case we simply return undefined so we don't break anything.
+					return undefined;
+				default:
+					// This shouldn't happen.
+					throw new Error("Clapp: internal error. Please report this to the bug tracker.");
+			}
 		}
 	}]);
 

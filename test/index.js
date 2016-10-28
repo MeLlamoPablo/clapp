@@ -88,7 +88,7 @@ describe('Clapp.App', function(){
 			setTimeout(function(){
 				expect(r).to.be('message');
 				done();
-			}, 200);
+			}, 100);
 		});
 
 		it('should pass flags and arguments', function(){
@@ -155,6 +155,390 @@ describe('Clapp.App', function(){
 			app.parseInput('/app foo -t');
 
 			expect(passed_argv.flags.testflag).to.be.ok();
+		});
+
+		describe('data types parsing', function(){
+			describe('string given', function(){
+				it('should work if a string is asked', function(){
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg === "passed");
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.args.testarg === "string") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[
+							{
+								name: 'testarg',
+								desc: 'desc',
+								type: 'string',
+								required: true
+							}
+						]
+					));
+
+					app.parseInput("-app foo thisisastring");
+
+					expect(passed).to.be(true);
+				});
+
+				it('should\'nt work if a number is asked', function() {
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = msg.includes("Error");
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							console.log(argv);
+							if (typeof argv.flags.testflag === "boolean") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[
+							{
+								name: 'testarg',
+								desc: 'desc',
+								type: 'number',
+								required: true
+							}
+						]
+					));
+
+					app.parseInput("-app foo notanumber");
+
+					expect(passed).to.be(true);
+				});
+
+				describe('boolean asked', function(){
+					it('should work if the string can be converted to boolean', function(){
+						var passed = false;
+
+						var app = new Clapp.App({
+							name: 'test', desc: 'desc', prefix: '-app'
+						}, function(msg){
+							passed = (msg === "passed");
+						});
+
+						app.addCommand(new Clapp.Command(
+							'foo',
+							function(argv) {
+								if (typeof argv.flags.testflag === "boolean") {
+									return "passed";
+								} else {
+									return "not passed";
+								}
+							}, 'desc',
+							[],
+							[
+								{
+									name: 'testflag',
+									desc: 'desc',
+									type: 'boolean',
+									default: false
+								}
+							]
+						));
+
+						app.parseInput("-app foo --testflag=true");
+
+						expect(passed).to.be(true);
+					});
+
+					it('shouldn\'t work if the string can\'t be converted to boolean', function(){
+						var passed = false;
+
+						var app = new Clapp.App({
+							name: 'test', desc: 'desc', prefix: '-app'
+						}, function(msg){
+							passed = msg.includes("Error");
+						});
+
+						app.addCommand(new Clapp.Command(
+							'foo',
+							function(argv) {
+								console.log(argv);
+								if (typeof argv.flags.testflag === "boolean") {
+									return "passed";
+								} else {
+									return "not passed";
+								}
+							}, 'desc',
+							[],
+							[
+								{
+									name: 'testflag',
+									desc: 'desc',
+									type: 'boolean',
+									default: false
+								}
+							]
+						));
+
+						app.parseInput("-app foo --testflag='notaboolean'");
+
+						expect(passed).to.be(true);
+					});
+				});
+			});
+
+			describe('number given', function(){
+				it('should work if a string is asked', function(){
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg === "passed");
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.args.testarg === "string") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[
+							{
+								name: 'testarg',
+								desc: 'desc',
+								type: 'string',
+								required: true
+							}
+						]
+					));
+
+					app.parseInput("-app foo 123");
+
+					expect(passed).to.be(true);
+				});
+
+				it('should work if a number is asked', function(){
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg === "passed");
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.args.testarg === "number") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[
+							{
+								name: 'testarg',
+								desc: 'desc',
+								type: 'number',
+								required: true
+							}
+						]
+					));
+
+					app.parseInput("-app foo 123");
+
+					expect(passed).to.be(true);
+				});
+
+				describe('boolean asked', function(){
+					it('should work if the number can be converted to boolean', function(){
+						var passed = false;
+
+						var app = new Clapp.App({
+							name: 'test', desc: 'desc', prefix: '-app'
+						}, function(msg){
+							passed = (msg === "passed");
+						});
+
+						app.addCommand(new Clapp.Command(
+							'foo',
+							function(argv) {
+								if (typeof argv.flags.testflag === "boolean") {
+									return "passed";
+								} else {
+									return "not passed";
+								}
+							}, 'desc',
+							[],
+							[
+								{
+									name: 'testflag',
+									desc: 'desc',
+									type: 'boolean',
+									default: false
+								}
+							]
+						));
+
+						app.parseInput("-app foo --testflag=1");
+
+						expect(passed).to.be(true);
+					});
+
+					it('shouldn\'t work if the string can\'t be converted to boolean', function(){
+						var passed = false;
+
+						var app = new Clapp.App({
+							name: 'test', desc: 'desc', prefix: '-app'
+						}, function(msg){
+							passed = (msg.includes("Error"));
+						});
+
+						app.addCommand(new Clapp.Command(
+							'foo',
+							function(argv) {
+								if (typeof argv.flags.testflag === "boolean") {
+									return "passed";
+								} else {
+									return "not passed";
+								}
+							}, 'desc',
+							[],
+							[
+								{
+									name: 'testflag',
+									desc: 'desc',
+									type: 'boolean',
+									default: false
+								}
+							]
+						));
+
+						app.parseInput("-app foo --testflag=1234");
+
+						expect(passed).to.be(true);
+					});
+				});
+			});
+
+			describe('boolean given', function(){
+				it('shouldn\'t work if a string is asked', function() {
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg.includes("Error"));
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.flags.testflag === "boolean") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[],
+						[
+							{
+								name: 'testflag',
+								desc: 'desc',
+								type: 'string',
+								default: 'defaultval'
+							}
+						]
+					));
+
+					app.parseInput("-app foo --testflag");
+
+					expect(passed).to.be(true);
+				});
+
+				it('shouldn\'t work if a number is asked', function() {
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg.includes("Error"));
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.flags.testflag === "boolean") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[],
+						[
+							{
+								name: 'testflag',
+								desc: 'desc',
+								type: 'number',
+								default: 123
+							}
+						]
+					));
+
+					app.parseInput("-app foo --testflag");
+
+					expect(passed).to.be(true);
+				});
+
+				it('should work if a boolean is asked', function(){
+					var passed = false;
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '-app'
+					}, function(msg){
+						passed = (msg === "passed");
+					});
+
+					app.addCommand(new Clapp.Command(
+						'foo',
+						function(argv) {
+							if (typeof argv.flags.testflag === "boolean") {
+								return "passed";
+							} else {
+								return "not passed";
+							}
+						}, 'desc',
+						[],
+						[
+							{
+								name: 'testflag',
+								desc: 'desc',
+								type: 'boolean',
+								default: false
+							}
+						]
+					));
+
+					app.parseInput("-app foo --testflag");
+
+					expect(passed).to.be(true);
+				});
+			});
 		});
 
 		it('should allow modifications in the context', function(){
