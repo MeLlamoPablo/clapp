@@ -1,4 +1,43 @@
-'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Command.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li><li><a href="tutorial-v1-changes.html">v1-changes</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Command.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
 const Table      = require('cli-table2');
 const str        = require('./strings/en.js');
@@ -19,17 +58,15 @@ const str        = require('./strings/en.js');
  *                                              information, see {@tutorial
  *                                              Defining-the-command-function}.
  * @param {string}        [options.desc]        A description of what the command does.
- * @param {argument[]}    [options.args]        An array with every argument supported by the
- *                                              command. See {@link argument}.
- * @param {flag[]}        [options.flags]       An array with every flag supported by the command.
- *                                              See {@link flag}.
- * @param {boolean}       [options.async=false] DEPRECATED since 1.1.0. Use Promises instead, see
- *                                              {@tutorial Defining-the-command-function}.
- *                                              Whether or not the command's function is
+ * @param {boolean}       [options.async=false] Whether or not the command's function is
  *                                              asynchronous. If it is, it will receive a third
  *                                              parameter: callback, that you will need to call when
  *                                              the process is over. See {@tutorial
  *                                              Defining-the-command-function}.
+ * @param {argument[]}    [options.args]        An array with every argument supported by the
+ *                                              command. See {@link argument}.
+ * @param {flag[]}        [options.flags]       An array with every flag supported by the command.
+ *                                              See {@link flag}.
  *
  * @example
  * var foo = new Clapp.Command({
@@ -70,19 +107,19 @@ class Command {
 		           options.name             === ''          ||
 			typeof options.fn               !== 'function'  || // fn is required
 			(
-				options.desc &&
+				options.desc &amp;&amp;
 				typeof options.desc !== 'string'
 			)                                               || // options is not required
 			(
-				options.args &&
+				options.args &amp;&amp;
 				!Array.isArray(options.args)
 			)                                               || // args is not required
 			(
-				options.flags &&
+				options.flags &amp;&amp;
 				!Array.isArray(options.flags)
 			)                                               || // flags is not required
 			(
-				options.async &&
+				options.async &amp;&amp;
 				typeof options.async !== 'boolean'
 			)                                                  // async is not required
 
@@ -136,7 +173,7 @@ class Command {
 		 */
 		this.args = {};
 		options.args = options.args || [];
-		for (var i = 0; i < options.args.length; i++) {
+		for (var i = 0; i &lt; options.args.length; i++) {
 			if (typeof options.args[i].name !== 'string')
 				throw new Error('Error creating command ' + options.name +
 		                   ': unnamed argument. Please refer to the documentation.');
@@ -146,7 +183,7 @@ class Command {
 		                   ': unspecified argument type. Please refer to the documentation.');
 
 			if (
-				options.args[i].type !== "string"  &&
+				options.args[i].type !== "string"  &amp;&amp;
 				options.args[i].type !== "number"
 			) {
 				throw new Error('Error creating command ' + options.name +
@@ -187,7 +224,7 @@ class Command {
 			 * var myValidation = {
 			 * 	errorMessage: "The number must be between 1 and 100!",
 			 * 	validate: function (value) {
-			 * 		return value >= 1 && value <= 100;
+			 * 		return value >= 1 &amp;&amp; value &lt;= 100;
 			 * 	}
 			 * };
 			 *
@@ -199,7 +236,7 @@ class Command {
 					+ "in an array.");
 			}
 
-			for (var j = 0; j < validations.length; j++) {
+			for (var j = 0; j &lt; validations.length; j++) {
 				if (
 					typeof validations[j].errorMessage !== "string" ||
 					typeof validations[j].validate     !== "function"
@@ -237,7 +274,7 @@ class Command {
 
 			// If the argument is not required, it must have a default value
 			if (
-				!this.args[options.args[i].name].required &&
+				!this.args[options.args[i].name].required &amp;&amp;
 				typeof options.args[i].default !== 'undefined'
 			) {
 				if (typeof options.args[i].default !== options.args[i].type) {
@@ -250,7 +287,7 @@ class Command {
 			} else if
 			// If it doesn't have a default value, then show an error.
 			(
-				!this.args[options.args[i].name].required &&
+				!this.args[options.args[i].name].required &amp;&amp;
 				typeof options.args[i].default === 'undefined'
 			) {
 				throw new Error('Error creating command ' + options.name +
@@ -305,7 +342,7 @@ class Command {
 		 */
 		this.flags = {};
 		options.flags = options.flags || [];
-		for (i = 0; i < options.flags.length; i++) {
+		for (i = 0; i &lt; options.flags.length; i++) {
 			if (typeof options.flags[i].name !== 'string')
 				throw new Error('Error creating command ' + options.name +
 		                   ': unnamed flag. Please refer to the documentation.');
@@ -315,8 +352,8 @@ class Command {
 		                   ': unspecified flag type. Please refer to the documentation.');
 
 			if (
-				options.flags[i].type !== "boolean" &&
-				options.flags[i].type !== "string"  &&
+				options.flags[i].type !== "boolean" &amp;&amp;
+				options.flags[i].type !== "string"  &amp;&amp;
 				options.flags[i].type !== "number"
 			) {
 				throw new Error('Error creating command ' + options.name +
@@ -324,12 +361,12 @@ class Command {
 					' documentation.');
 			}
 
-			if (typeof options.flags[i].alias === 'string' && options.flags[i].alias.length !== 1)
+			if (typeof options.flags[i].alias === 'string' &amp;&amp; options.flags[i].alias.length !== 1)
 				throw new Error('Error creating command ' + options.name +
 		                   ': aliases can only be one character long.');
 
 			if (
-				typeof options.flags[i].default !== 'undefined' &&
+				typeof options.flags[i].default !== 'undefined' &amp;&amp;
 				typeof options.flags[i].default !== options.flags[i].type
 			) {
 				throw new Error('Error creating command ' + options.name +
@@ -343,7 +380,7 @@ class Command {
 					"in an array.");
 			}
 
-			for (j = 0; j < validations.length; j++) {
+			for (j = 0; j &lt; validations.length; j++) {
 				if (
 					typeof validations[j].errorMessage !== "string" ||
 					typeof validations[j].validate     !== "function"
@@ -459,3 +496,22 @@ class Command {
 }
 
 module.exports = Command;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Nov 21 2016 19:27:29 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

@@ -16,10 +16,10 @@ Both objects contain children objects with your data. So if you define the follo
 
 ```javascript
 var flag = {
-	name: 'limit',
-	desc: 'The number of items that will be shown. Can\'t be higher than 50',
-	type: 'number',
-	alias: 'l',
+	name: "limit",
+	desc: "The number of items that will be shown.",
+	type: "number",
+	alias: "l",
 	default: 10
 }
 ```
@@ -27,7 +27,7 @@ var flag = {
 And the user runs:
 
 ```javascript
-app.parseInput('/testapp foo -l 25');
+app.parseInput("/testapp foo -l 25");
 ```
 
 Then you get:
@@ -41,7 +41,7 @@ function(argv, context) {
 
 If the user ran:
 ```javascript
-app.parseInput('/testapp foo');
+app.parseInput("/testapp foo");
 ```
 Then you'd get:
 
@@ -63,11 +63,10 @@ In your command function, you can `return` a `string` that will be redirected to
 ```javascript
 // Command function
 function(argv, context) {
-	if (argv.flags.limit < 50) {
-		doTheThing();
-		return 'Operation successful!';
+	if (argv.flags.iAmHappy) {
+		return "Awesome! :)";
 	} else {
-		return 'The limit can\'t be higher than 50, sorry!';
+		return "Then smile! :)";
 	}
 }
 ```
@@ -79,81 +78,115 @@ If you also need to pass your own data to your `onReply` function, you can modif
 ```javascript
 // Command function
 function(argv, context) {
-	if (argv.flags.limit < 50) {
-		doTheThing();
+	if (argv.flags.iAmHappy) {
 		return {
-			message: 'Operation successful!',
+			message: "Awesome",
 			context: {
-				operation_complete: true
+				userIsHappy: true
 			}
 		};
 	} else {
 		return {
-			message: 'The limit can\'t be higher than 50, sorry!',
+			message: "Then smile! :)",
 			context: {
-				operation_complete: false
+				userIsHappy: false
 			}
 		};
 	}
 }
 ```
 
-You may omit the `message` param, though it is not recommended. If you do it, your `onReply`'s `msg` will be `undefined`, wich may cause unexpected behaviour. So you should probably prepare your function for that scenario.
-
 To learn more about contexts, see [Working with contexts]{@tutorial Working-with-contexts}.
 
 #### Not doing anything
 
-If you don't want to send a message, just return something that is neither `string` nor `object` or don't return nothing at all.
+If you don't want to send a message, return something that is neither `string`, `object` nor
+ `Promise`, or just don't return nothing at all.
 
 ## Asynchronous functions
 
-In some cases, you might need your command's `fn` to behave asynchronously. In order to do so, first you need to set the `async` parameter to `true`:
-
-```javascript
-new Clapp.Command(
-	'foo',
-	// [...]
-	true // Set the fn to be async
-);
-```
-
-Now, the data returned with the `return` statement will be ignored. Instead, your `fn` will receive three parameters: `argv`, `context`, and `callback`:
+In some cases, you might need your command's `fn` to behave asynchronously. In order to do so, 
+you can return a [`Promise`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise),
+and instead of returning your data through the `return` statement, you can return it inside the 
+promise using the `fulfill` function:
 
 ```javascript
 // Command function
-function(argv, context, callback) {
-	doTheThing().then(() => {
-		callback();
+function(argv, context) {
+	return new Promise((fulfill, reject) => {
+		doTheThing().then(() => {
+			fulfill("I'm done!");
+		});
 	});
 }
 ```
 
-When you call the `callback`, Clapp will understand that the command execution is over. Of course, you can use the `callback` to pass your response and modify the context:
-
-#### Returning a message
-
-`callback` accepts a string as its first parameter: the message that will be redirected to your `onReply` function. Be careful, it can only be a string, other data types won't trigger `onReply`.
+Of course, the examples above still apply: you can modify the context from within the `Promise`:
 
 ```javascript
 // Command function
-function(argv, context, callback) {
-	doTheThing().then(thing => {
-		callback(thing.toString());
+function(argv, context) {
+	return new Promise((fulfill, reject) => {
+		doTheThing().then((bar) => {
+			context.bar = bar;
+			fulfill("I'm done!", context);
+		});
 	});
 }
 ```
 
-#### Modifying the context
+#### Rejecting the promise
 
-`callback` accepts the modified `context` as its second parameter. If you don't pass anything, the current `context` will also be redirected to `onReply`.
+Typically, when you're dealing with Promises, you're also dealing with error handling; the async 
+functions that you invoke inside your command's function may return errors. If you encounter any 
+of them, you might be inclined to log them to the console:
 
 ```javascript
 // Command function
-function(argv, context, callback) {
-	doTheThing().then((foo, bar) => {
-		context.bar = bar;
-		callback(foo.toString(), context);
+function(argv, context) {
+	return new Promise((fulfill, reject) => {
+		doTheThing().then(() => {
+			fulfill("I'm done!");
+		}).catch(err => {
+			console.error(err);
+		});
 	});
 }
 ```
+
+However, this doesn't let the user know about what happened. To solve this, you can use the 
+`reject` function to pass the error back to Clapp:
+
+```javascript
+// Command function
+function(argv, context) {
+	return new Promise((fulfill, reject) => {
+		doTheThing().then(() => {
+			fulfill("I'm done!");
+		}).catch(err => {
+			reject(err);
+		});
+	});
+}
+```
+
+Which can be simplified to:
+
+```javascript
+// Command function
+function(argv, context) {
+	return new Promise((fulfill, reject) => {
+		doTheThing().then(() => {
+			fulfill("I'm done!");
+		}).catch(reject);
+	});
+}
+```
+
+This will log the error to the console, and send the following message to the output: `An internal
+error occurred while trying to execute the command <command>.`. You should only use the `reject` 
+function for errors that don't concern the user. For example, "the connection to the database 
+can't be established", or "there is a syntax error on your code". The end user probably doesn't 
+care, so the standard message is good enough. It's best to avoid using this function for errors 
+that concern them, such as "this element can't be found in the database". To alert the user about
+ that, just use `fulfill`.

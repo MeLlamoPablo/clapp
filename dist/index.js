@@ -140,7 +140,7 @@ var App = function () {
 	_createClass(App, [{
 		key: 'addCommand',
 		value: function addCommand(cmd) {
-			if (!(cmd instanceof Command)) throw new Error('Error adding a command to ' + name + '. Provided parameter is not a command. Please refer to the documentation.');
+			if (!(cmd instanceof Command)) throw new Error('Error adding a command to ' + this.name + '. Provided parameter is not a command. Please refer to the documentation.');
 
 			this.commands[cmd.name] = cmd;
 		}
@@ -300,6 +300,8 @@ var App = function () {
        * 	}
        * }
        */
+
+							// The property async is deprecated, but we still give support to it
 							if (!this.commands[argv._[0]].async) {
 								response = this.commands[argv._[0]].fn(final_argv, context);
 
