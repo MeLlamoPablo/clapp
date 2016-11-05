@@ -10,8 +10,8 @@ In order to extend command, declare your own class, and call `super` indide the 
 
 ```js
 class MyCommand extends Clapp.Command {
-	constructor(name, fn, desc = '', args = [], flags = [], async = false) {
-		super(name, fn, desc, args, flags, async);
+	constructor(options) {
+		super(options);
 	}
 }
 ```
@@ -20,8 +20,8 @@ After that, you may implement your own `_getHelp()` method:
 
 ```js
 class MyCommand extends Clapp.Command {
-	constructor(name, fn, desc = '', args = [], flags = []) {
-		super(name, fn, desc, args, flags);
+	constructor(options) {
+		super(options);
 	}
 
 
@@ -129,8 +129,8 @@ The procedure for extending App is the same:
 
 ```js
 class MyApp extends Clapp.App {
-	constructor(options, onReply, commands = []) {
-		super(options, onReply, commands);
+	constructor(options) {
+		super(options);
 	}
 
 	_getHelp() {

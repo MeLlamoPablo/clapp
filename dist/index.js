@@ -13,82 +13,111 @@ var Command = require('./Command.js');
 var str = require('./strings/en.js');
 
 /**
+ * @class App
+ *
  * A command line app. An App can parse an input with {@link parseInput}, and if it's correct (i.e:
  * refers to an existing command and provides the required options), the command will be executed.
  * An App needs an onReply function to be able to communicate with the user.
  *
- * @class App
  * @param {object} options
- * @param {string} options.name      The app's name. This isn't necessarily the same as the prefix.
- *                                   Its only purpose is to be shown to the user in case of syntax
- *                                   error, or when they request the app help.
- * @param {string} options.desc      A description of what the app does. This will be used to
- *                                   document the app's help.
- * @param {string} options.prefix    The app's prefix. It will be used by {@link parseInput} to
- *                                   determine the user's intention to run a command corresponding
- *                                   to this App instance.
- * @param {string} [options.version] The app's version. It will be used to document the app's help.
- * @param {onReply} onReply          A function that allows the App to communicate with the end user.
- *                                   When the App needs to show an output, the onReply function will
- *                                   be executed.
- * @param {Command[]} [commands]     An array of commands that will immediately be bound to the
- *                                   app. Additional commands can be later bound using
- *                                   {@link addCommand}.
+ * @param {string} options.name
+ *
+ * The app's name. This isn't necessarily the same as the prefix. Its only purpose is to be shown to
+ * the user in case of syntax error, or when they request the app help.
+ *
+ * @param {string} options.desc
+ *
+ * A description of what the app does. This will be used to document the app's help.
+ *
+ * @param {string} options.prefix
+ *
+ * The app's prefix. It will be used by {@link parseInput} to determine the user's intention to run
+ * a command corresponding to this App instance.
+ *
+ * @param {onReply} options.onReply
+ *
+ * A function that allows the App to communicate with the end user. When the App needs to show an
+ * output, the onReply function will be executed.
+ *
+ * @param {string} [options.version]
+ *
+ * The app's version. It will be used to document the app's help.
+ *
+ * @param {string} [options.separator=" "]
+ *
+ * A string that separates the app's prefix from the rest of the CLI sentence. For instance, in the
+ * sentence `-testapp foo` the separator would be `' '` (space character). Normally you wouldn't
+ * want to touch this, but in some scenarios it's useful to have the separator be `''`
+ * (empty string), so that you could do `/command`, where `/` is the app's prefix.
+ *
+ * @param {Command[]} [options.commands]
+ *
+ * An array of commands that will immediately be bound to the app. Additional commands can be later
+ * bound using {@link App#addCommand}.
  *
  * @example
  * const Clapp = require('clapp');
- * var myApp = new Clapp.App(
- * 	{
- * 		name: 'Test App',
- * 		desc: 'An app created with Clapp!',
- * 		prefix: '/testapp', // Commands will have this structure: /testapp foo --bar
- * 		version: '1.2.0'
- * 	},
- * 	function(msg, context) {
- * 		// Called when the App shows an output
+ *
+ * var myApp = new Clapp.App({
+ * 	name: "Test App",
+ * 	desc: "An app created with Clapp!",
+ * 	prefix: "-testapp", // Commands will have this structure: -testapp foo --bar
+ * 	version: "1.2.0",
+ * 	onReply: function (msg, context) {
+ * 		// Called when the App shows output
  * 		console.log(msg);
  * 	},
- * 	[myCommand1, myCommand2]
- * );
+ * 	commands: [myCommand1, myCommand2]
+ * });
  *
  * myApp.addCommand(myCommand3);
  */
 
 var App = function () {
-	function App(options, onReply) {
-		var commands = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
+	function App(options) {
 		_classCallCheck(this, App);
 
-		if (typeof options === 'undefined' || typeof options.name !== 'string' || typeof options.desc !== 'string' || typeof options.prefix !== 'string' || typeof onReply !== 'function' || !Array.isArray(commands)) throw new Error('Wrong options passed into the Clapp constructor. ' + 'Please refer to the documentation.');
+		if (typeof options === 'undefined' || // options is required
+		typeof options.name !== 'string' || // name is required
+		typeof options.desc !== 'string' || // desc is required
+		typeof options.prefix !== 'string' || // prefix is required
+		typeof options.onReply !== 'function' || // onReply is required
+		options.commands && !Array.isArray(options.commands) || // commands are not required
+		options.version && typeof options.version !== 'string' || // version is not required
+		options.separator && typeof options.separator !== 'string' // separator is not required
+
+		) throw new Error('Wrong options passed into the Clapp constructor. ' + 'Please refer to the documentation.');
 
 		this.name = options.name;
 		this.desc = options.desc;
 		this.prefix = options.prefix;
 		this.version = typeof options.version === 'string' ? options.version : undefined;
+		// doing options.separator || ' ' would invalidate the separator being ''
+		this.separator = typeof options.separator !== 'undefined' ? options.separator : ' ';
 
 		/**
    * @typedef {function} onReply
    *
    * The onReply function gets called every time Clapp needs to show output to the user. It
-   * receives two parameters: msg and context. The msg parameter is the message that you need
-   * to show to the user. It can be the generated command help, if the user requests it, an
-   * error message if the user doesn't pass a valid cli sentence, or a message returned by
-   * the command function.
+   * receives two parameters: `msg` and `context`. The `msg` parameter is the message that you
+   * need to show to the user. It can be the generated command help, if the user requests
+   * it, an error message if the user doesn't pass a valid cli sentence, or your own message,
+   * returned by the command function.
    *
-   * The context is what you defined, for more information see
-   * {@tutorial Working-with-contexts}
+   * The `context` is anything that you defined when calling {@link App#parseInput}, for more
+   * information see {@tutorial Working-with-contexts}
    *
    * @example
    * function(msg, context) {
    * 	createMessage(msg, context.user);
    * }
    */
-		this.reply = onReply;
+		this.reply = options.onReply;
 
 		this.commands = {};
-		for (var i = 0; i < commands.length; i++) {
-			this.addCommand(commands[i]);
+		options.commands = options.commands || [];
+		for (var i = 0; i < options.commands.length; i++) {
+			this.addCommand(options.commands[i]);
 		}
 	}
 
@@ -123,9 +152,12 @@ var App = function () {
    * sentence, the user is warned about the problem. If the user passes the "--help" flag, they
    * are prompted with the app general help, or the command specific help.
    *
-   * Please note that the input is not sanitized. It is your responsibility to do so. It is also
-   * reccommended that you make sure that the input is a CLI sentence (valid or not) by using
-   * [isCliSentence]{@link App#isCliSentence}. Otherwise, Clapp will log an error.
+   * Please note the following:
+   *
+   * - The input is not sanitized. It is your responsibility to do so.
+   * - It would be a good idea to sanitize your input by using [validations]{@link validation}.
+   * - It is also imperative that you make sure that the input is a CLI sentence (valid or
+   * not) by using [isCliSentence]{@link App#isCliSentence}. Otherwise, Clapp will throw an error.
    *
    * @param {string} input A CLI sentence. See [isCliSentence]{@link App#isCliSentence}.
    * @param {*} context The context to retrieve later. See {@tutorial Working-with-contexts}.
@@ -135,7 +167,8 @@ var App = function () {
    * app.parseInput('/testapp foo --bar');  // Executes `foo` passing the --bar flag
    * app.parseInput('/testapp foo --help'); // Shows the command help for `foo`
    * app.parseInput('/testapp --help');     // Shows the app help
-   * app.parseInput('Not a CLI sentence');  // Does nothing, logs a warning.
+   * app.parseInput('Not a CLI sentence');  // Throws an error. Make sure to validate
+   *                                        // user input with App.isCliSentence();
    */
 
 	}, {
@@ -144,11 +177,10 @@ var App = function () {
 			if (typeof input !== 'string') throw new Error('Input must be a string! Don\'t forget to sanitize it.');
 
 			if (!this.isCliSentence(input)) {
-				console.log('[CLAPP] Warning: attempted to parse the input "' + input + '", ' + 'but it is not a CLI sentence (doesn\'t begin with the app prefix).');
-				return false;
+				throw new Error('Clapp: attempted to parse the input "' + input + '", ' + 'but it is not a CLI sentence (doesn\'t begin with the app prefix).');
 			}
 
-			var argv = parseSentence(input.replace(this.prefix + ' ', ''));
+			var argv = parseSentence(input.replace(this.prefix + this.separator, ''));
 
 			// Find whether or not the requested command exists
 			var cmd = this.commands[argv._[0]];
@@ -205,6 +237,14 @@ var App = function () {
 
 							if (_typeof(final_argv.args[i]) === "object") {
 								errors.push("Error on argument " + i + ": expected " + final_argv.args[i].expectedType + ", got " + final_argv.args[i].providedType + " instead.");
+							} else {
+								// If the user input matches the required data type, perform every
+								// validation, if there's any:
+								for (var k = 0; k < cmd.args[i].validations.length; k++) {
+									if (!cmd.args[i].validations[k].validate(final_argv.args[i])) {
+										errors.push("Error on argument " + i + ": " + cmd.args[i].validations[k].errorMessage);
+									}
+								}
 							}
 
 							j++;
@@ -212,9 +252,9 @@ var App = function () {
 
 						// Give values to every flag
 						for (i in cmd.flags) {
-							if (typeof argv[i] === 'undefined') {
+							if (typeof argv[i] === 'undefined' || argv[i] === null) {
 								// The user didn't specify the flag, but might have specified the alias
-								final_argv.flags[i] = typeof argv[cmd.flags[i].alias] === 'undefined' ? cmd.flags[i].default : argv[cmd.flags[i].alias];
+								final_argv.flags[i] = argv[cmd.flags[i].alias] || cmd.flags[i].default;
 							} else {
 								// The user specified the flag
 								final_argv.flags[i] = argv[i];
@@ -225,6 +265,14 @@ var App = function () {
 
 							if (_typeof(final_argv.flags[i]) === "object") {
 								errors.push("Error on flag " + i + ": expected " + final_argv.flags[i].expectedType + ", got " + final_argv.flags[i].providedType + " instead.");
+							} else {
+								// If the user input matches the required data type, perform every
+								// validation, if there's any:
+								for (k = 0; k < cmd.flags[i].validations.length; k++) {
+									if (!cmd.flags[i].validations[k].validate(final_argv.flags[i])) {
+										errors.push("Error on flag " + i + ": " + cmd.flags[i].validations[k].errorMessage);
+									}
+								}
 							}
 						}
 
@@ -236,7 +284,7 @@ var App = function () {
        *
        * For more information, see {@tutorial Defining-the-command-function}.
        *
-       * @property {Object} args  An object containning every argument.
+       * @property {Object} args  An object containing every argument.
        * @property {Object} flags An object containing every flag.
        *
        * @example
@@ -300,15 +348,15 @@ var App = function () {
 	}, {
 		key: 'isCliSentence',
 		value: function isCliSentence(sentence) {
-			return sentence === this.prefix || sentence.substring(0, this.prefix.length + 1) === this.prefix + ' ';
+			return sentence === this.prefix || sentence.substring(0, this.prefix.length + this.separator.length) === this.prefix + this.separator;
 		}
 
 		/**
    * Converts an argument to the requested data type. Returns null if impossible.
    * @param  {string|number|boolean} arg
    * @param  {string}                toType
-   * @return {string|number|boolean|undefined|inputMismatchInfo}
-   *         Returns the desired value, or the error  information on fail.
+   * @return {string|number|boolean|null|inputMismatchInfo}
+   *         Returns the desired value, or the error information on fail.
    * @private
    *
    * @typedef  {object} inputMismatchInfo
@@ -360,17 +408,15 @@ var App = function () {
 						case "string":
 							// String asked, string provided. We're good to go.
 							return arg;
-							break;
 						case "number":
 							// Number asked, string provided.
-							// We don't even try to conver the string to a number, because if the user
+							// We don't even try to convert the string to a number, because if the user
 							// had provided a number, minimist would have given us a number, meaning
 							// that we wouldn't be here. So we have an error.
 							return {
 								providedType: "string",
 								expectedType: "number"
 							};
-							break;
 						case "boolean":
 							// Boolean asked, string provided.
 							// The common scenario for getting a boolean would be an user inputting
@@ -381,11 +427,9 @@ var App = function () {
 								case "true":
 									// We have a boolean with the value true. We're good to go.
 									return true;
-									break;
 								case "false":
 									// We have a boolean with the value false. We're good to go.
 									return false;
-									break;
 								default:
 									// The string can't be converted to boolean.
 									// We have an error.
@@ -394,13 +438,12 @@ var App = function () {
 										expectedType: "boolean"
 									};
 							}
-							break;
+						/* istanbul ignore next */
 						default:
 							// This shouldn't happen.
 							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
 					}
 
-					break;
 				case "number":
 
 					switch (toType) {
@@ -409,11 +452,9 @@ var App = function () {
 							// This is fine, the expected value could be a number string,
 							// so we just convert it.
 							return arg.toString();
-							break;
 						case "number":
 							// Number asked, number provided. We're good to go.
 							return arg;
-							break;
 						case "boolean":
 							// We want to accept the values of 0 and 1 as booleans, and reject the rest.
 							if (arg === 0) {
@@ -426,15 +467,12 @@ var App = function () {
 									expectedType: "boolean"
 								};
 							}
-							break;
+						/* istanbul ignore next */
 						default:
 							// This shouldn't happen.
-							console.log(arg);
-							console.log(toType);
 							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
 					}
 
-					break;
 				case "boolean":
 
 					// If a boolean is provided, it only makes sense to accept it if a boolean is asked
@@ -446,27 +484,26 @@ var App = function () {
 								providedType: "boolean",
 								expectedType: "string"
 							};
-							break;
 						case "number":
 							return {
 								providedType: "boolean",
 								expectedType: "number"
 							};
-							break;
 						case "boolean":
 							// We gucci
 							return arg;
-							break;
+						/* istanbul ignore next */
 						default:
 							// This shouldn't happen.
 							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
 					}
 
-					break;
-				case "undefined":
+				case "object":
 					// This happens when a flag doesn't have a default value and the user doesn't
-					// provide it. In this case we simply return undefined so we don't break anything.
-					return undefined;
+					// provide it. In this case we simply return null so we don't break anything.
+					// Keep in mind that we're in this case because typeof null === "object"
+					return null;
+				/* istanbul ignore next */
 				default:
 					// This shouldn't happen.
 					throw new Error("Clapp: internal error. Please report this to the bug tracker.");

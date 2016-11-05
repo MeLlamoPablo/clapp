@@ -11,5 +11,8 @@
 		"tutorials": "./tutorials/",
 		"readme": "./README_jsdoc.md",
 		"destination": "./docs"
-	}
+	},
+	"plugins": [
+		"plugins/markdown"
+	]
 }
