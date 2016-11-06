@@ -140,7 +140,7 @@ var App = function () {
 	_createClass(App, [{
 		key: 'addCommand',
 		value: function addCommand(cmd) {
-			if (!(cmd instanceof Command)) throw new Error('Error adding a command to ' + name + '. Provided parameter is not a command. Please refer to the documentation.');
+			if (!(cmd instanceof Command)) throw new Error('Error adding a command to ' + this.name + '. Provided parameter is not a command. Please refer to the documentation.');
 
 			this.commands[cmd.name] = cmd;
 		}
