@@ -22,7 +22,7 @@ var Clapp = require('clapp');
 
 var app = new Clapp.App({
 	name: "Test App",
-	desc: "An app that doesn the thing",
+	desc: "An app that does the thing",
 	prefix: "-testapp",
 	version: "1.0",
 	onReply: function(msg, context) {
@@ -32,13 +32,13 @@ var app = new Clapp.App({
 	}
 });
 
-app.addCommand({
+app.addCommand(new Clapp.Command({
 	name: "foo",
 	desc: "An example command",
 	fn: function(argv, context) {
 		return "Foo was executed!"
 	}
-});
+}));
 
 var userInput = "-testapp foo";
 
