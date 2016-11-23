@@ -129,7 +129,10 @@ function(argv, context) {
 	return new Promise((fulfill, reject) => {
 		doTheThing().then((bar) => {
 			context.bar = bar;
-			fulfill("I'm done!", context);
+			fulfill({
+				message: "I'm done!",
+				context: context
+			});
 		});
 	});
 }

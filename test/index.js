@@ -304,63 +304,165 @@ describe('Clapp.App', function(){
 		});
 
 		describe('async command handling', function(){
-			it('should execute async commands', function(done){
-				var r;
-				var foo = new Clapp.Command({
-					name: 'foo',
-					fn: function(argv, context, cb) {
-						setTimeout(function() {
-							cb('message');
-						}, 100);
-					},
-					async: true
+
+			describe('with Promise', function () {
+
+				it('should execute async commands', function(done){
+					let r;
+					let foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context) {
+							return new Promise((fulfill, reject) => {
+								setTimeout(function() {
+									fulfill('message');
+								}, 10);
+							});
+						}
+					});
+
+					let app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg) {
+							r = msg;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo');
+
+					setTimeout(function(){
+						expect(r).to.be('message');
+						done();
+					}, 25);
 				});
 
-				var app = new Clapp.App({
-					name: 'test', desc: 'desc', prefix: '/app',
-					onReply: function(msg) {
-						r = msg;
-					}, commands: [foo]
+				it('should allow context modifications from async commands', function(done){
+					let r, c;
+					let foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context) {
+							return new Promise((fulfill, reject) => {
+								setTimeout(function() {
+									expect(context).to.be("old context");
+									let newContext = "hello world";
+									fulfill({
+										message: 'message',
+										context: newContext
+									});
+								}, 10);
+							});
+
+						}
+					});
+
+					let app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg, context) {
+							r = msg;
+							c = context;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo', "old context");
+
+					setTimeout(function(){
+						expect(r).to.be('message');
+						expect(c).to.be("hello world");
+						done();
+					}, 25);
 				});
 
-				app.parseInput('/app foo');
+				it('should handle rejects', function(done){
+					let r;
+					let foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context) {
+							return new Promise((fulfill, reject) => {
+								setTimeout(function() {
+									reject(new Error("Ignore this plz"));
+								}, 10);
+							});
+						}
+					});
 
-				setTimeout(function(){
-					expect(r).to.be('message');
-					done();
-				}, 100);
+					let app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg) {
+							r = msg;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo');
+
+					setTimeout(function(){
+						expect(r).to.contain("error");
+						done();
+					}, 25);
+				});
+
 			});
 
-			it('should allow context modifications from async commands', function(done){
-				var r, c;
-				var foo = new Clapp.Command({
-					name: 'foo',
-					fn: function(argv, context, cb) {
-						setTimeout(function() {
-							expect(context).to.be("old context");
-							var newContext = "hello world";
-							cb('message', newContext);
-						}, 100);
-					},
-					async: true
+			describe('with async attribute (deprecated)', function () {
+
+				it('should execute async commands', function(done){
+					var r;
+					var foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context, cb) {
+							setTimeout(function() {
+								cb('message');
+							}, 10);
+						},
+						async: true, suppressDeprecationWarnings: true
+					});
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg) {
+							r = msg;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo');
+
+					setTimeout(function(){
+						expect(r).to.be('message');
+						done();
+					}, 25);
 				});
 
-				var app = new Clapp.App({
-					name: 'test', desc: 'desc', prefix: '/app',
-					onReply: function(msg, context) {
-						r = msg;
-						c = context;
-					}, commands: [foo]
+				it('should allow context modifications from async commands', function(done){
+					var r, c;
+					var foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context, cb) {
+							setTimeout(function() {
+								expect(context).to.be("old context");
+								var newContext = "hello world";
+								cb('message', newContext);
+							}, 10);
+						},
+						async: true, suppressDeprecationWarnings: true
+					});
+
+					var app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg, context) {
+							r = msg;
+							c = context;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo', "old context");
+
+					setTimeout(function(){
+						expect(r).to.be('message');
+						expect(c).to.be("hello world");
+						done();
+					}, 25);
 				});
 
-				app.parseInput('/app foo', "old context");
-
-				setTimeout(function(){
-					expect(r).to.be('message');
-					expect(c).to.be("hello world");
-					done();
-				}, 100);
 			});
+
 		});
 
 		describe('data types parsing', function(){
@@ -603,7 +705,6 @@ describe('Clapp.App', function(){
 							name: 'foo',
 							desc: 'desc',
 							fn: function(argv) {
-								console.log(argv);
 								if (
 									argv.flags.testflag  === true &&
 									argv.flags.testflag2 === false
