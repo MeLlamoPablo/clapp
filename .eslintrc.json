@@ -111,6 +111,7 @@
         "no-confusing-arrow": "error",
 		"no-console": "off",
         "no-continue": "error",
+		"no-debugger": "error",
         "no-div-regex": "error",
         "no-duplicate-imports": "error",
         "no-else-return": "off",
@@ -121,6 +122,7 @@
         "no-extra-bind": "error",
         "no-extra-label": "error",
         "no-extra-parens": "off",
+		"no-extra-semi": "error",
         "no-floating-decimal": "error",
         "no-implicit-coercion": "error",
         "no-implicit-globals": "error",
@@ -131,6 +133,7 @@
             "functions"
         ],
         "no-invalid-this": "error",
+		"no-invalid-regexp": "error",
         "no-iterator": "error",
         "no-label-var": "error",
         "no-labels": "error",
@@ -254,7 +257,7 @@
         "space-infix-ops": "off",
         "space-unary-ops": "error",
         "spaced-comment": "off",
-        "strict": "off",
+        "strict": "error",
         "symbol-description": "error",
         "template-curly-spacing": "error",
         "unicode-bom": [
