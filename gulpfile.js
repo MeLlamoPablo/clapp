@@ -91,4 +91,4 @@ gulp.task('update-doc-version', function(){
 });
 
 gulp.task('prepublish', ['nsp', 'babel', 'update-doc-version']);
-gulp.task('default', ['test', 'coveralls']);
+gulp.task('default', ['test', 'coveralls', 'eslint']);
