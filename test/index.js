@@ -1,16 +1,18 @@
+/* eslint-disable */
+
 const expect = require('expect.js');
 const Clapp  = require('../lib');
 
 describe('Clapp.App', function(){
 	it('should create basic apps', function(){
-		var app = new Clapp.App({
+		let app = new Clapp.App({
 			name: 'test', desc: 'desc', prefix: '/app', onReply: function() {}
 		});
 		expect(app).to.be.a(Clapp.App);
 	});
 
 	it('should support app versions', function(){
-		var app = new Clapp.App({
+		let app = new Clapp.App({
 			name: 'test', desc: 'desc', prefix: '/app', version: '1.0', onReply: function() {}
 		});
 		expect(app).to.be.a(Clapp.App);
@@ -18,17 +20,17 @@ describe('Clapp.App', function(){
 	});
 
 	it('should add basic commands', function(){
-		var foo = new Clapp.Command({
+		let foo = new Clapp.Command({
 			name: 'foo',
 			fn: function() {}
 		});
 
-		var bar = new Clapp.Command({
+		let bar = new Clapp.Command({
 			name: 'bar',
 			fn: function() {}
 		});
 
-		var app = new Clapp.App({
+		let app = new Clapp.App({
 			name: 'test', desc: 'desc', prefix: '/app', onReply: function(){}, commands: [foo]
 		});
 
@@ -42,9 +44,9 @@ describe('Clapp.App', function(){
 	});
 
 	it('should support custom separators', function(){
-		var executed = false;
+		let executed = false;
 
-		var app = new Clapp.App({
+		let app = new Clapp.App({
 			name: 'test', desc: 'desc', prefix: '/', separator: '',
 			onReply: function(){}
 		});
@@ -63,15 +65,15 @@ describe('Clapp.App', function(){
 
 	describe('#parseInput()', function(){
 		it('should execute commands', function(){
-			var executed = false;
-			var foo = new Clapp.Command({
+			let executed = false;
+			let foo = new Clapp.Command({
 				name: 'foo',
 				fn: function() {
 					executed = true;
 				}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function() {}, commands: [foo]
 			});
@@ -82,9 +84,9 @@ describe('Clapp.App', function(){
 		});
 
 		it('should pass flags and arguments', function(){
-			var passed_argv;
+			let passed_argv;
 
-			var foo = new Clapp.Command({
+			let foo = new Clapp.Command({
 				name: 'foo',
 				desc: 'desc',
 				fn: function(argv) {
@@ -109,7 +111,7 @@ describe('Clapp.App', function(){
 				]
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function() {}, commands: [foo]
 			});
@@ -121,9 +123,9 @@ describe('Clapp.App', function(){
 		});
 
 		it('should recognize aliases', function(){
-			var passed_argv;
+			let passed_argv;
 
-			var foo = new Clapp.Command({
+			let foo = new Clapp.Command({
 				name: 'foo',
 				desc: 'desc',
 				fn: function(argv) {
@@ -140,7 +142,7 @@ describe('Clapp.App', function(){
 				]
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app', version: '1.2.3',
 				onReply: function() {}, commands: [foo]
 			});
@@ -151,8 +153,8 @@ describe('Clapp.App', function(){
 		});
 
 		it('should allow modifications in the context returning messages', function(){
-			var c;
-			var foo = new Clapp.Command({
+			let c;
+			let foo = new Clapp.Command({
 				name: 'foo',
 				fn: function(argv, context) {
 					context.push('b');
@@ -163,7 +165,7 @@ describe('Clapp.App', function(){
 				}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function(msg, context) {
 					c = context;
@@ -176,8 +178,8 @@ describe('Clapp.App', function(){
 		});
 
 		it('should allow modifications in the context without returning messages', function(){
-			var c;
-			var foo = new Clapp.Command({
+			let c;
+			let foo = new Clapp.Command({
 				name: 'foo',
 				fn: function(argv, context) {
 					context.push('b');
@@ -187,7 +189,7 @@ describe('Clapp.App', function(){
 				}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function(msg, context) {
 					c = context;
@@ -200,13 +202,13 @@ describe('Clapp.App', function(){
 		});
 
 		it('should show app version', function(){
-			var version;
+			let version;
 
-			var foo = new Clapp.Command({
+			let foo = new Clapp.Command({
 				name: 'foo', fn: function() {}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app', version: '1.2.3',
 				onReply: function(msg) {
 					version = msg;
@@ -219,13 +221,13 @@ describe('Clapp.App', function(){
 		});
 
 		it('should show app help', function(){
-			var help;
+			let help;
 
-			var foo = new Clapp.Command({
+			let foo = new Clapp.Command({
 				name: 'foo', fn: function() {}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app', version: '1.2.3',
 				onReply: function(msg) {
 					help = msg;
@@ -234,9 +236,9 @@ describe('Clapp.App', function(){
 
 			app.parseInput('/app --help');
 
-			var help2;
+			let help2;
 
-			var app2 = new Clapp.App({
+			let app2 = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app', version: '1.2.3',
 				onReply: function(msg) {
 					help2 = msg;
@@ -250,13 +252,13 @@ describe('Clapp.App', function(){
 		});
 
 		it('should show command	 help', function(){
-			var help;
+			let help;
 
-			var foo = new Clapp.Command({
+			let foo = new Clapp.Command({
 				name: 'foo', desc: 'desc', fn: function() {}
 			});
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app', version: '1.2.3',
 				onReply: function(msg) {
 					help = msg;
@@ -269,9 +271,9 @@ describe('Clapp.App', function(){
 		});
 
 		it('should pass default values', function(){
-			var passed;
+			let passed;
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'testapp', desc: 'desc', prefix: 'p',
 				onReply: function(){}
 			});
@@ -302,6 +304,8 @@ describe('Clapp.App', function(){
 
 			expect(passed).to.be.ok();
 		});
+
+		it('should show errors when options don\'t pass valiations');
 
 		describe('async command handling', function(){
 
@@ -371,6 +375,9 @@ describe('Clapp.App', function(){
 					}, 25);
 				});
 
+				it('shouldn\'t do anything if the fulfill value is not string or object with' +
+					' string and context');
+
 				it('should handle rejects', function(done){
 					let r;
 					let foo = new Clapp.Command({
@@ -404,8 +411,8 @@ describe('Clapp.App', function(){
 			describe('with async attribute (deprecated)', function () {
 
 				it('should execute async commands', function(done){
-					var r;
-					var foo = new Clapp.Command({
+					let r;
+					let foo = new Clapp.Command({
 						name: 'foo',
 						fn: function(argv, context, cb) {
 							setTimeout(function() {
@@ -415,7 +422,7 @@ describe('Clapp.App', function(){
 						async: true, suppressDeprecationWarnings: true
 					});
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '/app',
 						onReply: function(msg) {
 							r = msg;
@@ -431,20 +438,20 @@ describe('Clapp.App', function(){
 				});
 
 				it('should allow context modifications from async commands', function(done){
-					var r, c;
-					var foo = new Clapp.Command({
+					let r, c;
+					let foo = new Clapp.Command({
 						name: 'foo',
 						fn: function(argv, context, cb) {
 							setTimeout(function() {
 								expect(context).to.be("old context");
-								var newContext = "hello world";
+								let newContext = "hello world";
 								cb('message', newContext);
 							}, 10);
 						},
 						async: true, suppressDeprecationWarnings: true
 					});
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '/app',
 						onReply: function(msg, context) {
 							r = msg;
@@ -468,9 +475,9 @@ describe('Clapp.App', function(){
 		describe('data types parsing', function(){
 			describe('string given', function(){
 				it('should work if a string is asked', function(){
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg === "passed");
@@ -503,9 +510,9 @@ describe('Clapp.App', function(){
 				});
 
 				it('should\'nt work if a number is asked', function() {
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = msg.includes("Error");
@@ -539,9 +546,9 @@ describe('Clapp.App', function(){
 
 				describe('boolean asked', function(){
 					it('should work if the string can be converted to boolean', function(){
-						var passed = false;
+						let passed = false;
 
-						var app = new Clapp.App({
+						let app = new Clapp.App({
 							name: 'test', desc: 'desc', prefix: '-app',
 							onReply: function(msg){
 								passed = (msg === "passed");
@@ -583,9 +590,9 @@ describe('Clapp.App', function(){
 					});
 
 					it('shouldn\'t work if the string can\'t be converted to boolean', function(){
-						var passed = false;
+						let passed = false;
 
-						var app = new Clapp.App({
+						let app = new Clapp.App({
 							name: 'test', desc: 'desc', prefix: '-app',
 							onReply: function(msg){
 								passed = msg.includes("Error");
@@ -621,9 +628,9 @@ describe('Clapp.App', function(){
 
 			describe('number given', function(){
 				it('should work if a string is asked', function(){
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg === "passed");
@@ -656,9 +663,9 @@ describe('Clapp.App', function(){
 				});
 
 				it('should work if a number is asked', function(){
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg === "passed");
@@ -692,9 +699,9 @@ describe('Clapp.App', function(){
 
 				describe('boolean asked', function(){
 					it('should work if the number can be converted to boolean', function(){
-						var passed = false;
+						let passed = false;
 
-						var app = new Clapp.App({
+						let app = new Clapp.App({
 							name: 'test', desc: 'desc', prefix: '-app',
 							onReply: function(msg){
 								passed = (msg === "passed");
@@ -737,9 +744,9 @@ describe('Clapp.App', function(){
 
 					it('shouldn\'t work if the number can\'t be converted to boolean',
 						function(){
-						var passed = false;
+						let passed = false;
 
-						var app = new Clapp.App({
+						let app = new Clapp.App({
 							name: 'test', desc: 'desc', prefix: '-app',
 							onReply: function(msg){
 								passed = (msg.includes("Error"));
@@ -771,9 +778,9 @@ describe('Clapp.App', function(){
 
 			describe('boolean given', function(){
 				it('shouldn\'t work if a string is asked', function() {
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg.includes("Error"));
@@ -806,9 +813,9 @@ describe('Clapp.App', function(){
 				});
 
 				it('shouldn\'t work if a number is asked', function() {
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg.includes("Error"));
@@ -841,9 +848,9 @@ describe('Clapp.App', function(){
 				});
 
 				it('should work if a boolean is asked', function(){
-					var passed = false;
+					let passed = false;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'test', desc: 'desc', prefix: '-app',
 						onReply: function(msg){
 							passed = (msg === "passed");
@@ -880,10 +887,10 @@ describe('Clapp.App', function(){
 		describe('error handling', function(){
 			describe('developer error handling', function(){
 				it('should throw an error if not given a string', function(){
-					var thrown = [];
+					let thrown = [];
 
 					try {
-						var a = new Clapp.App({
+						let a = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -893,7 +900,7 @@ describe('Clapp.App', function(){
 					}
 
 					try {
-						var b = new Clapp.App({
+						let b = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -903,7 +910,7 @@ describe('Clapp.App', function(){
 					}
 
 					try {
-						var c = new Clapp.App({
+						let c = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -913,7 +920,7 @@ describe('Clapp.App', function(){
 					}
 
 					try {
-						var d = new Clapp.App({
+						let d = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -923,7 +930,7 @@ describe('Clapp.App', function(){
 					}
 
 					try {
-						var e = new Clapp.App({
+						let e = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -936,10 +943,10 @@ describe('Clapp.App', function(){
 				});
 
 				it('should throw an error if not given a CLI sentence', function(){
-					var thrown = [];
+					let thrown = [];
 
 					try {
-						var a = new Clapp.App({
+						let a = new Clapp.App({
 							name: 'testapp', desc: 'desc', prefix: 'p', onReply: function(){}
 						});
 
@@ -954,9 +961,9 @@ describe('Clapp.App', function(){
 
 			describe('user error handling', function(){
 				it('should show an error when an unknown command is passed', function(){
-					var r;
+					let r;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'testapp', desc: 'desc', prefix: 'p',
 						onReply: function(msg){
 							r = msg;
@@ -969,9 +976,9 @@ describe('Clapp.App', function(){
 				});
 
 				it('should show an error when required arguments aren\'t passed', function(){
-					var r;
+					let r;
 
-					var app = new Clapp.App({
+					let app = new Clapp.App({
 						name: 'testapp', desc: 'desc', prefix: 'p',
 						onReply: function(msg){
 							r = msg;
@@ -1000,9 +1007,9 @@ describe('Clapp.App', function(){
 
 	describe('#addCommand()', function(){
 		it('should only accept Command types', function(){
-			var thrown = [];
+			let thrown = [];
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				version: '1.2.3', onReply: function() {}
 			});
@@ -1033,9 +1040,9 @@ describe('Clapp.App', function(){
 				}
 			}
 
-			var response;
+			let response;
 
-			var app = new Clapp.App({
+			let app = new Clapp.App({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function(msg) {
 					response = msg;
@@ -1056,6 +1063,27 @@ describe('Clapp.App', function(){
 	});
 
 	describe('#_getHelp()', function(){
+		it('should show app help', function(){
+			let response;
+
+			let app = new Clapp.App({
+				name: 'test', desc: 'desc', prefix: '/app',
+				onReply: function(msg) {
+					response = msg;
+				}
+			});
+
+			app.addCommand(new Clapp.Command({
+				name: 'testc',
+				desc: 'desc',
+				fn: function(){},
+			}));
+
+			app.parseInput("/app");
+
+			expect(response).to.contain(app.name);
+		});
+
 		it('should show help for child instances of App', function(){
 			class MyApp extends Clapp.App {
 				constructor(options) {
@@ -1067,9 +1095,9 @@ describe('Clapp.App', function(){
 				}
 			}
 
-			var response;
+			let response;
 
-			var app = new MyApp({
+			let app = new MyApp({
 				name: 'test', desc: 'desc', prefix: '/app',
 				onReply: function(msg) {
 					response = msg;
@@ -1085,7 +1113,7 @@ describe('Clapp.App', function(){
 	// Exceptions
 
 	it('should throw an Error when given wrong options', function(){
-		var thrown = [];
+		let thrown = [];
 
 		try {
 			new Clapp.App();
@@ -1138,7 +1166,7 @@ describe('Clapp.App', function(){
 
 describe('Clapp.Command', function(){
 	it('should create basic commands', function(){
-		var foo = new Clapp.Command({
+		let foo = new Clapp.Command({
 			name: 'foo',
 			fn: function() {}
 		});
@@ -1147,7 +1175,7 @@ describe('Clapp.Command', function(){
 	});
 
 	it('should create basic commands with arguments', function(){
-		var foo = new Clapp.Command({
+		let foo = new Clapp.Command({
 			name: 'foo',
 			desc: 'desc',
 			fn: function() {},
@@ -1178,7 +1206,7 @@ describe('Clapp.Command', function(){
 
 	describe('error handling', function(){
 		it('should throw an Error when given wrong options', function(){
-			var thrown = [];
+			let thrown = [];
 
 			try {
 				new Clapp.Command()
@@ -1216,7 +1244,7 @@ describe('Clapp.Command', function(){
 		});
 
 		it('should throw an Error when given an unnamed argument or flag', function(){
-			var thrown = [];
+			let thrown = [];
 
 			try {
 				new Clapp.Command({
@@ -1258,7 +1286,7 @@ describe('Clapp.Command', function(){
 
 		it('should throw an Error when given an unspecified argument or flag type',
 			function(){
-			var thrown = [];
+			let thrown = [];
 
 			try {
 				new Clapp.Command({
@@ -1298,8 +1326,10 @@ describe('Clapp.Command', function(){
 			expect(thrown).to.eql(['a', 'b']);
 		});
 
+		it('should throw an Error when given a flag without a default value');
+
 		it('should throw an Error when given an invalid argument or flag type', function(){
-			var thrown = [];
+			let thrown = [];
 
 			try {
 				new Clapp.Command({
@@ -1361,7 +1391,7 @@ describe('Clapp.Command', function(){
 		});
 
 		it('should throw an Error when given an alias with multiple characters', function(){
-			var thrown = [];
+			let thrown = [];
 
 			try {
 				new Clapp.Command({
@@ -1386,7 +1416,7 @@ describe('Clapp.Command', function(){
 		});
 
 		it('should throw an Error when given invalid validations', function(){
-			var thrown = [];
+			let thrown = [];
 
 			// The validations is not an array
 

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -6,12 +6,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var parseSentence = require('minimist-string');
-var Table = require('cli-table2');
+var parseSentence = require("minimist-string");
+var Table = require("cli-table2");
 
-var Command = require('./Command.js');
-var str = require('./strings/en.js');
+var Command = require("./Command.js");
+var str = require("./strings/en.js");
 
+/* eslint-disable valid-jsdoc - syntax error for some reason? */
 /**
  * @class App
  *
@@ -72,28 +73,29 @@ var str = require('./strings/en.js');
  *
  * myApp.addCommand(myCommand3);
  */
+/* eslint-enable */
 
 var App = function () {
 	function App(options) {
 		_classCallCheck(this, App);
 
-		if (typeof options === 'undefined' || // options is required
-		typeof options.name !== 'string' || // name is required
-		typeof options.desc !== 'string' || // desc is required
-		typeof options.prefix !== 'string' || // prefix is required
-		typeof options.onReply !== 'function' || // onReply is required
+		if (typeof options === "undefined" || // options is required
+		typeof options.name !== "string" || // name is required
+		typeof options.desc !== "string" || // desc is required
+		typeof options.prefix !== "string" || // prefix is required
+		typeof options.onReply !== "function" || // onReply is required
 		options.commands && !Array.isArray(options.commands) || // commands are not required
-		options.version && typeof options.version !== 'string' || // version is not required
-		options.separator && typeof options.separator !== 'string' // separator is not required
+		options.version && typeof options.version !== "string" || // version is not required
+		options.separator && typeof options.separator !== "string" // separator is not required
 
-		) throw new Error('Wrong options passed into the Clapp constructor. ' + 'Please refer to the documentation.');
+		) throw new Error("Wrong options passed into the Clapp constructor. " + "Please refer to the documentation.");
 
 		this.name = options.name;
 		this.desc = options.desc;
 		this.prefix = options.prefix;
-		this.version = typeof options.version === 'string' ? options.version : undefined;
+		this.version = typeof options.version === "string" ? options.version : undefined;
 		// doing options.separator || ' ' would invalidate the separator being ''
-		this.separator = typeof options.separator !== 'undefined' ? options.separator : ' ';
+		this.separator = typeof options.separator !== "undefined" ? options.separator : " ";
 
 		/**
    * @typedef {function} onReply
@@ -126,21 +128,23 @@ var App = function () {
   * [parseInput]{@link App#parseInput}.
   *
   * @param {Command} cmd The command to bind.
+  * @return {undefined}
   *
   * @example
-  * app.addCommand(new Clapp.Command(
-  * 	'foo',
-  * 	function(argv, context) {
-  * 		console.log('foo was executed');
+  * app.addCommand(new Clapp.Command({
+  * 	name: "foo",
+  * 	desc: "An example command",
+  * 	fn : function(argv, context) {
+  * 		console.log("foo was executed");
   * 	}
-  * )):
+  * })):
   */
 
 
 	_createClass(App, [{
-		key: 'addCommand',
+		key: "addCommand",
 		value: function addCommand(cmd) {
-			if (!(cmd instanceof Command)) throw new Error('Error adding a command to ' + this.name + '. Provided parameter is not a command. Please refer to the documentation.');
+			if (!(cmd instanceof Command)) throw new Error("Error adding a command to " + this.name + ". Provided parameter is not a command. Please refer to the documentation.");
 
 			this.commands[cmd.name] = cmd;
 		}
@@ -161,30 +165,33 @@ var App = function () {
    *
    * @param {string} input A CLI sentence. See [isCliSentence]{@link App#isCliSentence}.
    * @param {*} context The context to retrieve later. See {@tutorial Working-with-contexts}.
+   * @return {undefined}
    *
    * @example
-   * app.parseInput('/testapp foo');        // Executes `foo`
-   * app.parseInput('/testapp foo --bar');  // Executes `foo` passing the --bar flag
-   * app.parseInput('/testapp foo --help'); // Shows the command help for `foo`
-   * app.parseInput('/testapp --help');     // Shows the app help
-   * app.parseInput('Not a CLI sentence');  // Throws an error. Make sure to validate
+   * app.parseInput("/testapp foo");        // Executes `foo`
+   * app.parseInput("/testapp foo --bar");  // Executes `foo` passing the --bar flag
+   * app.parseInput("/testapp foo --help"); // Shows the command help for `foo`
+   * app.parseInput("/testapp --help");     // Shows the app help
+   * app.parseInput("Not a CLI sentence");  // Throws an error. Make sure to validate
    *                                        // user input with App.isCliSentence();
    */
 
 	}, {
-		key: 'parseInput',
+		key: "parseInput",
 		value: function parseInput(input, context) {
-			if (typeof input !== 'string') throw new Error('Input must be a string! Don\'t forget to sanitize it.');
+			var _this = this;
+
+			if (typeof input !== "string") throw new Error("Input must be a string! Don't forget to sanitize it.");
 
 			if (!this.isCliSentence(input)) {
-				throw new Error('Clapp: attempted to parse the input "' + input + '", ' + 'but it is not a CLI sentence (doesn\'t begin with the app prefix).');
+				throw new Error("Clapp: attempted to parse the input \"" + input + "\", " + "but it is not a CLI sentence (doesn't begin with the app prefix).");
 			}
 
-			var argv = parseSentence(input.replace(this.prefix + this.separator, ''));
+			var argv = parseSentence(input.replace(this.prefix + this.separator, ""));
 
 			// Find whether or not the requested command exists
 			var cmd = this.commands[argv._[0]];
-			if (typeof cmd === 'undefined') {
+			if (typeof cmd === "undefined") {
 				// The command doesn't exist. Four scenarios possible:
 				if (argv.help || input === this.prefix) {
 					// The help flag was passed OR the user typed just the command prefix.
@@ -192,10 +199,10 @@ var App = function () {
 					this.reply(this._getHelp(), context);
 				} else if (argv.version) {
 					// The user asked for the app version
-					this.reply('v' + this.version, context);
+					this.reply("v" + this.version, context);
 				} else {
 					// The user made a mistake. Let them know.
-					this.reply(str.err + str.err_unknown_command.replace('%CMD%', argv._[0]) + ' ' + str.err_type_help.replace('%PREFIX%', this.prefix), context);
+					this.reply(str.err + str.err_unknown_command.replace("%CMD%", argv._[0]) + " " + str.err_type_help.replace("%PREFIX%", this.prefix), context);
 				}
 			} else {
 				// The command exists. Three scenarios possible:
@@ -207,17 +214,17 @@ var App = function () {
 					var unfulfilled_args = {};
 					var j = 1; // 1 because argv._[0] is the command name
 					for (var i in cmd.args) {
-						if (cmd.args[i].required && typeof argv._[j] === 'undefined') unfulfilled_args[i] = cmd.args[i];
+						if (cmd.args[i].required && typeof argv._[j] === "undefined") unfulfilled_args[i] = cmd.args[i];
 
 						j++;
 					}
 
 					if (Object.keys(unfulfilled_args).length > 0) {
-						var r = str.err + str.err_unfulfilled_args + '\n';
-						for (i in unfulfilled_args) {
-							r += i + '\n';
+						var r = str.err + str.err_unfulfilled_args + "\n";
+						for (var _i in unfulfilled_args) {
+							r += _i + "\n";
 						}
-						r += '\n' + str.err_type_help.replace('%PREFIX%', this.prefix + ' ' + argv._[0]);
+						r += "\n" + str.err_type_help.replace("%PREFIX%", this.prefix + " " + argv._[0]);
 
 						this.reply(r, context);
 					} else {
@@ -226,23 +233,23 @@ var App = function () {
 
 						// Give values to every argument
 						j = 1;
-						for (i in cmd.args) {
-							final_argv.args[i] = argv._[j];
+						for (var _i2 in cmd.args) {
+							final_argv.args[_i2] = argv._[j];
 
 							// If the arg wasn't supplied and it has a default value, use it
-							if (typeof final_argv.args[i] === 'undefined' && typeof cmd.args[i].default !== 'undefined') final_argv.args[i] = cmd.args[i].default;
+							if (typeof final_argv.args[_i2] === "undefined" && typeof cmd.args[_i2].default !== "undefined") final_argv.args[_i2] = cmd.args[_i2].default;
 
 							// Convert it to the correct type, and register errors.
-							final_argv.args[i] = App._convertType(final_argv.args[i], cmd.args[i].type);
+							final_argv.args[_i2] = App._convertType(final_argv.args[_i2], cmd.args[_i2].type);
 
-							if (_typeof(final_argv.args[i]) === "object") {
-								errors.push("Error on argument " + i + ": expected " + final_argv.args[i].expectedType + ", got " + final_argv.args[i].providedType + " instead.");
+							if (_typeof(final_argv.args[_i2]) === "object") {
+								errors.push("Error on argument " + _i2 + ": expected " + final_argv.args[_i2].expectedType + ", got " + final_argv.args[_i2].providedType + " instead.");
 							} else {
 								// If the user input matches the required data type, perform every
 								// validation, if there's any:
-								for (var k = 0; k < cmd.args[i].validations.length; k++) {
-									if (!cmd.args[i].validations[k].validate(final_argv.args[i])) {
-										errors.push("Error on argument " + i + ": " + cmd.args[i].validations[k].errorMessage);
+								for (var k = 0; k < cmd.args[_i2].validations.length; k++) {
+									if (!cmd.args[_i2].validations[k].validate(final_argv.args[_i2])) {
+										errors.push("Error on argument " + _i2 + ": " + cmd.args[_i2].validations[k].errorMessage);
 									}
 								}
 							}
@@ -251,33 +258,33 @@ var App = function () {
 						}
 
 						// Give values to every flag
-						for (i in cmd.flags) {
-							if (typeof argv[i] === 'undefined' || argv[i] === null) {
+						for (var _i3 in cmd.flags) {
+							if (typeof argv[_i3] === "undefined" || argv[_i3] === null) {
 								// The user didn't specify the flag, but might have specified the alias
-								final_argv.flags[i] = argv[cmd.flags[i].alias] || cmd.flags[i].default;
+								final_argv.flags[_i3] = argv[cmd.flags[_i3].alias] || cmd.flags[_i3].default;
 							} else {
 								// The user specified the flag
-								final_argv.flags[i] = argv[i];
+								final_argv.flags[_i3] = argv[_i3];
 							}
 
 							// Convert it to the correct type, and register errors.
-							final_argv.flags[i] = App._convertType(final_argv.flags[i], cmd.flags[i].type);
+							final_argv.flags[_i3] = App._convertType(final_argv.flags[_i3], cmd.flags[_i3].type);
 
-							if (_typeof(final_argv.flags[i]) === "object") {
-								errors.push("Error on flag " + i + ": expected " + final_argv.flags[i].expectedType + ", got " + final_argv.flags[i].providedType + " instead.");
+							if (_typeof(final_argv.flags[_i3]) === "object") {
+								errors.push("Error on flag " + _i3 + ": expected " + final_argv.flags[_i3].expectedType + ", got " + final_argv.flags[_i3].providedType + " instead.");
 							} else {
 								// If the user input matches the required data type, perform every
 								// validation, if there's any:
-								for (k = 0; k < cmd.flags[i].validations.length; k++) {
-									if (!cmd.flags[i].validations[k].validate(final_argv.flags[i])) {
-										errors.push("Error on flag " + i + ": " + cmd.flags[i].validations[k].errorMessage);
+								for (var _k = 0; _k < cmd.flags[_i3].validations.length; _k++) {
+									if (!cmd.flags[_i3].validations[_k].validate(final_argv.flags[_i3])) {
+										errors.push("Error on flag " + _i3 + ": " + cmd.flags[_i3].validations[_k].errorMessage);
 									}
 								}
 							}
 						}
 
 						// If we don't have any errors, we can execute the command
-						var response;
+						var response = void 0;
 						if (errors.length === 0) {
 							/**
        * @typedef {Object} argv
@@ -305,27 +312,50 @@ var App = function () {
 							if (!this.commands[argv._[0]].async) {
 								response = this.commands[argv._[0]].fn(final_argv, context);
 
-								if (typeof response === 'string') {
+								if (response instanceof Promise) {
+									// Even though the async attribute is set to false, the command
+									// is actually async because it returned a promise.
+									Promise.resolve(response).then(function (actualResponse) {
+										// Note the difference between response and actual_response
+										// response is a Promise that will eventually return a value
+										// actualResponse is the value that was returned by the promise
+										if (typeof actualResponse === "string") {
+											_this.reply(actualResponse, context);
+										} else if ((typeof actualResponse === "undefined" ? "undefined" : _typeof(actualResponse)) === "object" && (typeof actualResponse.message === "string" || typeof actualResponse.context !== "undefined")) {
+											_this.reply(actualResponse.message, actualResponse.context);
+										}
+									}).catch(function (err) {
+										_this.reply(str.err_internal_error.replace("%CMD%", _this.commands[argv._[0]].name), context);
+										console.error(err);
+									});
+								} else if (typeof response === "string") {
 									this.reply(response, context);
-								} else if ((typeof response === 'undefined' ? 'undefined' : _typeof(response)) === 'object' && (typeof response.message !== 'undefined' || typeof response.context !== 'undefined')) {
+								} else if ((typeof response === "undefined" ? "undefined" : _typeof(response)) === "object" && (typeof response.message !== "string" || typeof response.context !== "undefined")) {
 									this.reply(response.message, response.context);
 								}
 							} else {
-								var self = this;
-								this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
-									if (typeof response === 'string') {
-										if (typeof newContext !== 'undefined') {
-											self.reply(response, newContext);
-										} else {
-											self.reply(response, context);
+								(function () {
+									var self = _this;
+									_this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
+										if (typeof response === "string") {
+											if (typeof newContext !== "undefined") {
+												self.reply(response, newContext);
+											} else {
+												self.reply(response, context);
+											}
 										}
+									});
+
+									if (!_this.commands[argv._[0]].suppressDeprecationWarnings) {
+										/* istanbul ignore next */
+										console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
 									}
-								});
+								})();
 							}
 						} else {
 							response = str.err + str.err_type_mismatch + "\n\n";
-							for (i = 0; i < errors.length; i++) {
-								response += errors[i] + "\n";
+							for (var _i4 = 0; _i4 < errors.length; _i4++) {
+								response += errors[_i4] + "\n";
 							}
 							this.reply(response, context);
 						}
@@ -341,6 +371,7 @@ var App = function () {
    * sentence is a CLI sentence that does not result in an error upon parsing.
    *
    * @param {string} sentence The string to test.
+   * @return {boolean} Whether or not the sentence is a CLI sentence.
    *
    * @example
    * app.isCliSentence('/testapp foo --bar'); // True
@@ -348,15 +379,15 @@ var App = function () {
    */
 
 	}, {
-		key: 'isCliSentence',
+		key: "isCliSentence",
 		value: function isCliSentence(sentence) {
 			return sentence === this.prefix || sentence.substring(0, this.prefix.length + this.separator.length) === this.prefix + this.separator;
 		}
 
 		/**
    * Converts an argument to the requested data type. Returns null if impossible.
-   * @param  {string|number|boolean} arg
-   * @param  {string}                toType
+   * @param  {string|number|boolean} arg    The provided argument
+   * @param  {string}                toType The type we want the argument to be.
    * @return {string|number|boolean|null|inputMismatchInfo}
    *         Returns the desired value, or the error information on fail.
    * @private
@@ -367,26 +398,27 @@ var App = function () {
    */
 
 	}, {
-		key: '_getHelp',
+		key: "_getHelp",
 
 
 		/**
    * Returns the global app help
    *
+   * @return {string} The App Help
    * @private
    */
 		value: function _getHelp() {
 			var LINE_WIDTH = 100;
 
-			var r = this.name + (typeof this.version !== 'undefined' ? ' v' + this.version : '') + '\n' + this.desc + '\n\n' + str.help_usage + this.prefix + ' ' + str.help_command + '\n\n' + str.help_cmd_list + '\n\n';
+			var r = this.name + (typeof this.version !== "undefined" ? " v" + this.version : "") + "\n" + this.desc + "\n\n" + str.help_usage + this.prefix + " " + str.help_command + "\n\n" + str.help_cmd_list + "\n\n";
 
 			// Command list
 			var table = new Table({
 				chars: {
-					'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
-					'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
-					'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
-					'middle': ''
+					"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
+					"bottom-mid": "", "bottom-left": "", "bottom-right": "", "left": "",
+					"left-mid": "", "mid": "", "mid-mid": "", "right": "", "right-mid": "",
+					"middle": ""
 				},
 				colWidths: [0.1 * LINE_WIDTH, 0.9 * LINE_WIDTH],
 				wordWrap: true
@@ -396,14 +428,14 @@ var App = function () {
 				table.push([i, this.commands[i].desc]);
 			}
 
-			r += table.toString() + '\n\n' + str.help_further_help + this.prefix + ' ' + str.help_command + ' --help';
+			r += table.toString() + "\n\n" + str.help_further_help + this.prefix + " " + str.help_command + " --help";
 
 			return r;
 		}
 	}], [{
-		key: '_convertType',
+		key: "_convertType",
 		value: function _convertType(arg, toType) {
-			switch (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) {
+			switch (typeof arg === "undefined" ? "undefined" : _typeof(arg)) {
 				case "string":
 
 					switch (toType) {

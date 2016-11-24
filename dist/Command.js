@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -6,8 +6,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Table = require('cli-table2');
-var str = require('./strings/en.js');
+var Table = require("cli-table2");
+var str = require("./strings/en.js");
 
 /**
  * A Command that can be bound to an App. A command represents a single function that achieves a
@@ -15,7 +15,7 @@ var str = require('./strings/en.js');
  * redirected to the app output (See: {@link onReply}).
  *
  * @class  Command
- * @param {object}        options
+ * @param {object}        options               The command options
  * @param {string}        options.name          The command's name. The command will be invoked
  *                                              by writing the app prefix followed by a space
  *                                              and the command's name.
@@ -25,15 +25,17 @@ var str = require('./strings/en.js');
  *                                              information, see {@tutorial
  *                                              Defining-the-command-function}.
  * @param {string}        [options.desc]        A description of what the command does.
- * @param {boolean}       [options.async=false] Whether or not the command's function is
- *                                              asynchronous. If it is, it will receive a third
- *                                              parameter: callback, that you will need to call when
- *                                              the process is over. See {@tutorial
- *                                              Defining-the-command-function}.
  * @param {argument[]}    [options.args]        An array with every argument supported by the
  *                                              command. See {@link argument}.
  * @param {flag[]}        [options.flags]       An array with every flag supported by the command.
  *                                              See {@link flag}.
+ * @param {boolean}       [options.async=false] DEPRECATED since 1.1.0. Use Promises instead, see
+ *                                              {@tutorial Defining-the-command-function}.
+ *                                              Whether or not the command's function is
+ *                                              asynchronous. If it is, it will receive a third
+ *                                              parameter: callback, that you will need to call when
+ *                                              the process is over. See {@tutorial
+ *                                              Defining-the-command-function}.
  *
  * @example
  * var foo = new Clapp.Command({
@@ -72,20 +74,21 @@ var Command = function () {
 	function Command(options) {
 		_classCallCheck(this, Command);
 
-		if (typeof options.name !== 'string' || // name is required
-		options.name === '' || typeof options.fn !== 'function' || // fn is required
-		options.desc && typeof options.desc !== 'string' || // options is not required
+		if (typeof options.name !== "string" || // name is required
+		options.name === "" || typeof options.fn !== "function" || // fn is required
+		options.desc && typeof options.desc !== "string" || // options is not required
 		options.args && !Array.isArray(options.args) || // args is not required
 		options.flags && !Array.isArray(options.flags) || // flags is not required
-		options.async && typeof options.async !== 'boolean' // async is not required
+		options.async && typeof options.async !== "boolean" // async is not required
 
 
-		) throw new Error('Wrong parameters passed when creating command ' + options.name + '. Please refer to the documentation.');
+		) throw new Error("Wrong parameters passed when creating command " + options.name + ". Please refer to the documentation.");
 
 		this.name = options.name;
 		this.desc = options.desc || null;
 		this.async = options.async || false;
 		this.fn = options.fn;
+		this.suppressDeprecationWarnings = options.suppressDeprecationWarnings;
 
 		/**
    * @typedef {Object} argument
@@ -129,12 +132,12 @@ var Command = function () {
 		this.args = {};
 		options.args = options.args || [];
 		for (var i = 0; i < options.args.length; i++) {
-			if (typeof options.args[i].name !== 'string') throw new Error('Error creating command ' + options.name + ': unnamed argument. Please refer to the documentation.');
+			if (typeof options.args[i].name !== "string") throw new Error("Error creating command " + options.name + ": unnamed argument. Please refer to the documentation.");
 
-			if (typeof options.args[i].type !== 'string') throw new Error('Error creating command ' + options.name + ': unspecified argument type. Please refer to the documentation.');
+			if (typeof options.args[i].type !== "string") throw new Error("Error creating command " + options.name + ": unspecified argument type. Please refer to the documentation.");
 
 			if (options.args[i].type !== "string" && options.args[i].type !== "number") {
-				throw new Error('Error creating command ' + options.name + ': argument types can only be string or number. Please refer to the' + ' documentation.');
+				throw new Error("Error creating command " + options.name + ": argument types can only be string or number. Please refer to the" + " documentation.");
 			}
 
 			/**
@@ -178,16 +181,16 @@ var Command = function () {
     */
 			var validations = options.args[i].validations || [];
 			if (!Array.isArray(validations)) {
-				throw new Error('Error creating command ' + options.name + ": validations must be " + "in an array.");
+				throw new Error("Error creating command " + options.name + ": validations must be " + "in an array.");
 			}
 
 			for (var j = 0; j < validations.length; j++) {
 				if (typeof validations[j].errorMessage !== "string" || typeof validations[j].validate !== "function") {
-					throw new Error('Error creating command ' + options.name + ": a provided" + " validation is missing one of their parameters. Please refer to the" + " documentation.");
+					throw new Error("Error creating command " + options.name + ": a provided" + " validation is missing one of their parameters. Please refer to the" + " documentation.");
 				}
 
 				// Test the validation to check if it returns a boolean
-				var testVal;
+				var testVal = void 0;
 				switch (options.args[i].type) {
 					case "string":
 						testVal = "Clapp is testing your validation. Please don't panic.";
@@ -198,28 +201,28 @@ var Command = function () {
 				}
 
 				if (typeof validations[j].validate(testVal) !== "boolean") {
-					throw new Error('Error creating command ' + options.name + ": one of your" + " validations was tested, but it didn't return a boolean value.");
+					throw new Error("Error creating command " + options.name + ": one of your" + " validations was tested, but it didn't return a boolean value.");
 				}
 			}
 
 			this.args[options.args[i].name] = {
-				required: typeof options.args[i].required === 'boolean' ? options.args[i].required : false,
-				desc: typeof options.args[i].desc === 'undefined' ? undefined : options.args[i].desc,
+				required: typeof options.args[i].required === "boolean" ? options.args[i].required : false,
+				desc: typeof options.args[i].desc === "undefined" ? undefined : options.args[i].desc,
 				type: options.args[i].type,
 				validations: validations
 			};
 
 			// If the argument is not required, it must have a default value
-			if (!this.args[options.args[i].name].required && typeof options.args[i].default !== 'undefined') {
+			if (!this.args[options.args[i].name].required && typeof options.args[i].default !== "undefined") {
 				if (_typeof(options.args[i].default) !== options.args[i].type) {
-					throw new Error('Error creating command ' + options.name + ': argument default value for argument ' + options.args[i].name + ' does not match its data type. Please refer to the documentation.');
+					throw new Error("Error creating command " + options.name + ": argument default value for argument " + options.args[i].name + " does not match its data type. Please refer to the documentation.");
 				}
 
 				this.args[options.args[i].name].default = options.args[i].default;
 			} else if (
 			// If it doesn't have a default value, then show an error.
-			!this.args[options.args[i].name].required && typeof options.args[i].default === 'undefined') {
-				throw new Error('Error creating command ' + options.name + ': argument ' + options.args[i].name + ' is not required, but no default value' + ' was provided. Please refer to the documentation.');
+			!this.args[options.args[i].name].required && typeof options.args[i].default === "undefined") {
+				throw new Error("Error creating command " + options.name + ": argument " + options.args[i].name + " is not required, but no default value" + " was provided. Please refer to the documentation.");
 			}
 		}
 
@@ -269,55 +272,56 @@ var Command = function () {
    */
 		this.flags = {};
 		options.flags = options.flags || [];
-		for (i = 0; i < options.flags.length; i++) {
-			if (typeof options.flags[i].name !== 'string') throw new Error('Error creating command ' + options.name + ': unnamed flag. Please refer to the documentation.');
+		for (var _i = 0; _i < options.flags.length; _i++) {
+			if (typeof options.flags[_i].name !== "string") throw new Error("Error creating command " + options.name + ": unnamed flag. Please refer to the documentation.");
 
-			if (typeof options.flags[i].type !== 'string') throw new Error('Error creating command ' + options.name + ': unspecified flag type. Please refer to the documentation.');
+			if (typeof options.flags[_i].type !== "string") throw new Error("Error creating command " + options.name + ": unspecified flag type. Please refer to the documentation.");
 
-			if (options.flags[i].type !== "boolean" && options.flags[i].type !== "string" && options.flags[i].type !== "number") {
-				throw new Error('Error creating command ' + options.name + ': flag types can only be boolean, string or number. Please refer to the' + ' documentation.');
+			if (options.flags[_i].type !== "boolean" && options.flags[_i].type !== "string" && options.flags[_i].type !== "number") {
+				throw new Error("Error creating command " + options.name + ": flag types can only be boolean, string or number. Please refer to the" + " documentation.");
 			}
 
-			if (typeof options.flags[i].alias === 'string' && options.flags[i].alias.length !== 1) throw new Error('Error creating command ' + options.name + ': aliases can only be one character long.');
+			if (typeof options.flags[_i].alias === "string" && options.flags[_i].alias.length !== 1) throw new Error("Error creating command " + options.name + ": aliases can only be one character long.");
 
-			if (typeof options.flags[i].default !== 'undefined' && _typeof(options.flags[i].default) !== options.flags[i].type) {
-				throw new Error('Error creating command ' + options.name + ': flag default value for flag ' + args[i].name + ' does not' + ' match its data type. Please refer to the documentation.');
+			if (typeof options.flags[_i].default !== "undefined" && _typeof(options.flags[_i].default) !== options.flags[_i].type) {
+				throw new Error("Error creating command " + options.name + ": flag default value for flag " + options.flags[_i].name + " does not" + " match its data type. Please refer to the documentation.");
 			}
 
-			validations = options.flags[i].validations || [];
-			if (!Array.isArray(validations)) {
-				throw new Error('Error creating command ' + options.name + ": validations must be " + "in an array.");
+			var _validations = options.flags[_i].validations || [];
+			if (!Array.isArray(_validations)) {
+				throw new Error("Error creating command " + options.name + ": validations must" + " be in an array.");
 			}
 
-			for (j = 0; j < validations.length; j++) {
-				if (typeof validations[j].errorMessage !== "string" || typeof validations[j].validate !== "function") {
-					throw new Error('Error creating command ' + options.name + ": a provided" + " validation is missing one of their parameters. Please refer to the" + " documentation.");
+			for (var _j = 0; _j < _validations.length; _j++) {
+				if (typeof _validations[_j].errorMessage !== "string" || typeof _validations[_j].validate !== "function") {
+					throw new Error("Error creating command " + options.name + ": a provided" + " validation is missing one of their parameters. Please refer to the" + " documentation.");
 				}
 
 				// Test the validation to check if it returns a boolean
-				switch (options.flags[i].type) {
+				var _testVal = void 0;
+				switch (options.flags[_i].type) {
 					case "string":
-						testVal = "Clapp is testing your validation. Please don't panic.";
+						_testVal = "Clapp is testing your validation. Please don't panic.";
 						break;
 					case "number":
-						testVal = 123456;
+						_testVal = 123456;
 						break;
 					case "boolean":
 						// does it really make sense to validate a boolean though?
-						testVal = true;
+						_testVal = true;
 				}
 
-				if (typeof validations[j].validate(testVal) !== "boolean") {
-					throw new Error('Error creating command ' + options.name + ": one of your" + " validations was tested, but it didn't return a boolean value.");
+				if (typeof _validations[_j].validate(_testVal) !== "boolean") {
+					throw new Error("Error creating command " + options.name + ": one of your" + " validations was tested, but it didn't return a boolean value.");
 				}
 			}
 
-			this.flags[options.flags[i].name] = {
-				type: options.flags[i].type,
-				alias: options.flags[i].alias || null,
-				default: typeof options.flags[i].default === 'undefined' ? null : options.flags[i].default,
-				desc: options.flags[i].desc || null,
-				validations: validations
+			this.flags[options.flags[_i].name] = {
+				type: options.flags[_i].type,
+				alias: options.flags[_i].alias || null,
+				default: typeof options.flags[_i].default === "undefined" ? null : options.flags[_i].default,
+				desc: options.flags[_i].desc || null,
+				validations: _validations
 			};
 		}
 	}
@@ -326,61 +330,63 @@ var Command = function () {
   * Returns the command specific help
   *
   * @param {App} app We need it to access the parent app info.
+  * @return {string} The command help
   * @private
   */
 
 
 	_createClass(Command, [{
-		key: '_getHelp',
+		key: "_getHelp",
 		value: function _getHelp(app) {
 			var LINE_WIDTH = 100;
 
-			var r = str.help_usage + ' ' + app.prefix + ' ' + this.name;
+			var r = str.help_usage + " " + app.prefix + " " + this.name;
+			var args_table = void 0;
 
 			// Add every argument to the usage (Only if there are arguments)
 			if (Object.keys(this.args).length > 0) {
-				var args_table = new Table({
+				args_table = new Table({
 					chars: {
-						'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
-						'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
-						'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
-						'middle': ''
+						"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
+						"bottom-mid": "", "bottom-left": "", "bottom-right": "", "left": "",
+						"left-mid": "", "mid": "", "mid-mid": "", "right": "", "right-mid": "",
+						"middle": ""
 					},
-					head: ['Argument', 'Description', 'Default'],
+					head: ["Argument", "Description", "Default"],
 					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
 					wordWrap: true
 				});
 				for (var i in this.args) {
-					r += this.args[i].required ? ' (' + i + ')' : ' [' + i + ']';
-					args_table.push([i, typeof this.args[i].desc !== 'undefined' ? this.args[i].desc : '', typeof this.args[i].default !== 'undefined' ? this.args[i].default : '']);
+					r += this.args[i].required ? " (" + i + ")" : " [" + i + "]";
+					args_table.push([i, typeof this.args[i].desc !== "undefined" ? this.args[i].desc : "", typeof this.args[i].default !== "undefined" ? this.args[i].default : ""]);
 				}
 			}
 
-			r += '\n' + this.desc;
+			r += "\n" + this.desc;
 
-			if (Object.keys(this.args).length > 0) r += '\n\n' + str.help_av_args + ':\n\n' + args_table.toString();
+			if (Object.keys(this.args).length > 0) r += "\n\n" + str.help_av_args + ":\n\n" + args_table.toString();
 
 			// Add every flag, only if there are flags to add
 			if (Object.keys(this.flags).length > 0) {
 				var flags_table = new Table({
 					chars: {
-						'top': '', 'top-mid': '', 'top-left': '', 'top-right': '', 'bottom': '',
-						'bottom-mid': '', 'bottom-left': '', 'bottom-right': '', 'left': '',
-						'left-mid': '', 'mid': '', 'mid-mid': '', 'right': '', 'right-mid': '',
-						'middle': ''
+						"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
+						"bottom-mid": "", "bottom-left": "", "bottom-right": "", "left": "",
+						"left-mid": "", "mid": "", "mid-mid": "", "right": "", "right-mid": "",
+						"middle": ""
 					},
-					head: ['Option', 'Description', 'Default'],
+					head: ["Option", "Description", "Default"],
 					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
 					wordWrap: true
 				});
-				for (i in this.flags) {
-					flags_table.push([(typeof this.flags[i].alias !== 'undefined' ? '-' + this.flags[i].alias + ', ' : '') + '--' + i, typeof this.flags[i].desc !== 'undefined' ? this.flags[i].desc : '', typeof this.flags[i].default !== 'undefined' ? this.flags[i].default : '']);
+				for (var _i2 in this.flags) {
+					flags_table.push([(typeof this.flags[_i2].alias !== "undefined" ? "-" + this.flags[_i2].alias + ", " : "") + "--" + _i2, typeof this.flags[_i2].desc !== "undefined" ? this.flags[_i2].desc : "", typeof this.flags[_i2].default !== "undefined" ? this.flags[_i2].default : ""]);
 				}
 
-				r += '\n\n' + str.help_av_options + ':\n\n' + flags_table.toString();
+				r += "\n\n" + str.help_av_options + ":\n\n" + flags_table.toString();
 			}
 
-			if (Object.keys(this.args).length > 0) r += '\n\n' + str.help_args_required_optional;
+			if (Object.keys(this.args).length > 0) r += "\n\n" + str.help_args_required_optional;
 
 			return r;
 		}

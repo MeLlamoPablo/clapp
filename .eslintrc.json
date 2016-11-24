@@ -36,11 +36,13 @@
         "camelcase": "off",
         "class-methods-use-this": "error",
         "comma-dangle": "error",
-        "comma-spacing": "off",
-        "comma-style": [
-            "error",
-            "last"
-        ],
+        "comma-spacing": [
+			"error", {
+				"before": false,
+				"after": true
+			}
+		],
+        "comma-style": "off",
         "complexity": "off",
         "computed-property-spacing": [
             "error",
@@ -78,7 +80,7 @@
         "init-declarations": "off",
         "jsx-quotes": "error",
         "key-spacing": "error",
-        "keyword-spacing": "off",
+        "keyword-spacing": "error",
         "line-comment-position": "off",
         "linebreak-style": [
             "error",
@@ -194,6 +196,7 @@
         "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",
         "no-unused-expressions": "error",
+		"no-unused-vars": "error",
         "no-use-before-define": "error",
         "no-useless-call": "error",
         "no-useless-computed-key": "error",
@@ -254,9 +257,11 @@
             "error",
             "never"
         ],
-        "space-infix-ops": "off",
+        "space-infix-ops": "error",
         "space-unary-ops": "error",
-        "spaced-comment": "off",
+        "spaced-comment": [
+			"warn", "always"
+		],
         "strict": "error",
         "symbol-description": "error",
         "template-curly-spacing": "error",
