@@ -6,11 +6,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var parseSentence = require("minimist-string");
-var Table = require("cli-table2");
-
-var Command = require("./Command.js");
-var str = require("./strings/en.js");
+var Command = require("./Command.js"),
+    Table = require("cli-table2"),
+    parseSentence = require("minimist-string"),
+    str = require("./strings/en.js");
 
 /* eslint-disable valid-jsdoc - syntax error for some reason? */
 /**
@@ -88,7 +87,9 @@ var App = function () {
 		options.version && typeof options.version !== "string" || // version is not required
 		options.separator && typeof options.separator !== "string" // separator is not required
 
-		) throw new Error("Wrong options passed into the Clapp constructor. " + "Please refer to the documentation.");
+		) {
+				throw new Error("Wrong options passed into the Clapp constructor. " + "Please refer to the documentation.");
+			}
 
 		this.name = options.name;
 		this.desc = options.desc;
@@ -144,7 +145,9 @@ var App = function () {
 	_createClass(App, [{
 		key: "addCommand",
 		value: function addCommand(cmd) {
-			if (!(cmd instanceof Command)) throw new Error("Error adding a command to " + this.name + ". Provided parameter is not a command. Please refer to the documentation.");
+			if (!(cmd instanceof Command)) {
+				throw new Error("Error adding a command to " + this.name + ". Provided parameter is not a command. Please refer to the documentation.");
+			}
 
 			this.commands[cmd.name] = cmd;
 		}
@@ -181,7 +184,9 @@ var App = function () {
 		value: function parseInput(input, context) {
 			var _this = this;
 
-			if (typeof input !== "string") throw new Error("Input must be a string! Don't forget to sanitize it.");
+			if (typeof input !== "string") {
+				throw new Error("Input must be a string! Don't forget to sanitize it.");
+			}
 
 			if (!this.isCliSentence(input)) {
 				throw new Error("Clapp: attempted to parse the input \"" + input + "\", " + "but it is not a CLI sentence (doesn't begin with the app prefix).");
@@ -214,7 +219,9 @@ var App = function () {
 					var unfulfilled_args = {};
 					var j = 1; // 1 because argv._[0] is the command name
 					for (var i in cmd.args) {
-						if (cmd.args[i].required && typeof argv._[j] === "undefined") unfulfilled_args[i] = cmd.args[i];
+						if (cmd.args[i].required && typeof argv._[j] === "undefined") {
+							unfulfilled_args[i] = cmd.args[i];
+						}
 
 						j++;
 					}
@@ -237,7 +244,9 @@ var App = function () {
 							final_argv.args[_i2] = argv._[j];
 
 							// If the arg wasn't supplied and it has a default value, use it
-							if (typeof final_argv.args[_i2] === "undefined" && typeof cmd.args[_i2].default !== "undefined") final_argv.args[_i2] = cmd.args[_i2].default;
+							if (typeof final_argv.args[_i2] === "undefined" && typeof cmd.args[_i2].default !== "undefined") {
+								final_argv.args[_i2] = cmd.args[_i2].default;
+							}
 
 							// Convert it to the correct type, and register errors.
 							final_argv.args[_i2] = App._convertType(final_argv.args[_i2], cmd.args[_i2].type);
@@ -532,11 +541,6 @@ var App = function () {
 							throw new Error("Clapp: internal error." + "Please report this to the bug tracker.");
 					}
 
-				case "object":
-					// This happens when a flag doesn't have a default value and the user doesn't
-					// provide it. In this case we simply return null so we don't break anything.
-					// Keep in mind that we're in this case because typeof null === "object"
-					return null;
 				/* istanbul ignore next */
 				default:
 					// This shouldn't happen.

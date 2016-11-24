@@ -6,8 +6,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Table = require("cli-table2");
-var str = require("./strings/en.js");
+var Table = require("cli-table2"),
+    str = require("./strings/en.js");
 
 /**
  * A Command that can be bound to an App. A command represents a single function that achieves a
@@ -41,7 +41,6 @@ var str = require("./strings/en.js");
  * var foo = new Clapp.Command({
  * 	name: "foo",
  * 	desc: "does foo things",
- * 	async: false,
  * 	fn: function(argv, context) {
  * 		console.log("foo was executed!");
  * 	},
@@ -69,8 +68,6 @@ var str = require("./strings/en.js");
  */
 
 var Command = function () {
-
-	//constructor(name, fn, desc = '', args = [], flags = [], async = false) {
 	function Command(options) {
 		_classCallCheck(this, Command);
 
@@ -82,7 +79,9 @@ var Command = function () {
 		options.async && typeof options.async !== "boolean" // async is not required
 
 
-		) throw new Error("Wrong parameters passed when creating command " + options.name + ". Please refer to the documentation.");
+		) {
+				throw new Error("Wrong parameters passed when creating command " + options.name + ". Please refer to the documentation.");
+			}
 
 		this.name = options.name;
 		this.desc = options.desc || null;
@@ -132,9 +131,13 @@ var Command = function () {
 		this.args = {};
 		options.args = options.args || [];
 		for (var i = 0; i < options.args.length; i++) {
-			if (typeof options.args[i].name !== "string") throw new Error("Error creating command " + options.name + ": unnamed argument. Please refer to the documentation.");
+			if (typeof options.args[i].name !== "string") {
+				throw new Error("Error creating command " + options.name + ": unnamed argument. Please refer to the documentation.");
+			}
 
-			if (typeof options.args[i].type !== "string") throw new Error("Error creating command " + options.name + ": unspecified argument type. Please refer to the documentation.");
+			if (typeof options.args[i].type !== "string") {
+				throw new Error("Error creating command " + options.name + ": unspecified argument type. Please refer to the documentation.");
+			}
 
 			if (options.args[i].type !== "string" && options.args[i].type !== "number") {
 				throw new Error("Error creating command " + options.name + ": argument types can only be string or number. Please refer to the" + " documentation.");
@@ -222,7 +225,7 @@ var Command = function () {
 			} else if (
 			// If it doesn't have a default value, then show an error.
 			!this.args[options.args[i].name].required && typeof options.args[i].default === "undefined") {
-				throw new Error("Error creating command " + options.name + ": argument " + options.args[i].name + " is not required, but no default value" + " was provided. Please refer to the documentation.");
+				throw new Error("Error creating command " + options.name + ": argument " + options.args[i].name + " is not required, but no default" + " value was provided. Please refer to the documentation.");
 			}
 		}
 
@@ -242,17 +245,13 @@ var Command = function () {
    *                                             command function.
    * @property {string}                type      The flag data type, either `string`,
    *                                             `number` or `boolean`.
+   * @property {string|number|boolean} default   A default value that will be passed into the
+   *                                             `argv.flags` if the user does not supply a
+   *                                             value.
    * @property {string}                [desc]    A description about what the flag is and
    *                                             what information the user is expected to
    *                                             supply. It is used to show the command
    *                                             help to the user.
-   * @property {string|number|boolean} [default] A default value that will be passed into the
-   *                                             `argv.flags` if the user does not supply a
-   *                                             value. While this is optional, it is
-   *                                             strongly encouraged that you supply it.
-   *                                             If you do not, when the user doesn't
-   *                                             provide the flag's value, you will get
-   *                                             null.
    * @property {string}                [alias]   A string of only one character containing
    *                                             the alias of the flag. If the alias of
    *                                             `limit` is `l`, then `--limit=15` will
@@ -273,15 +272,25 @@ var Command = function () {
 		this.flags = {};
 		options.flags = options.flags || [];
 		for (var _i = 0; _i < options.flags.length; _i++) {
-			if (typeof options.flags[_i].name !== "string") throw new Error("Error creating command " + options.name + ": unnamed flag. Please refer to the documentation.");
+			if (typeof options.flags[_i].name !== "string") {
+				throw new Error("Error creating command " + options.name + ": unnamed flag. Please refer to the documentation.");
+			}
 
-			if (typeof options.flags[_i].type !== "string") throw new Error("Error creating command " + options.name + ": unspecified flag type. Please refer to the documentation.");
+			if (typeof options.flags[_i].type !== "string") {
+				throw new Error("Error creating command " + options.name + ": unspecified flag type. Please refer to the documentation.");
+			}
 
 			if (options.flags[_i].type !== "boolean" && options.flags[_i].type !== "string" && options.flags[_i].type !== "number") {
 				throw new Error("Error creating command " + options.name + ": flag types can only be boolean, string or number. Please refer to the" + " documentation.");
 			}
 
-			if (typeof options.flags[_i].alias === "string" && options.flags[_i].alias.length !== 1) throw new Error("Error creating command " + options.name + ": aliases can only be one character long.");
+			if (typeof options.flags[_i].alias === "string" && options.flags[_i].alias.length !== 1) {
+				throw new Error("Error creating command " + options.name + ": aliases can only be one character long.");
+			}
+
+			if (typeof options.flags[_i].default === "undefined") {
+				throw new Error("Error creating command " + options.name + ": flag " + options.flags[_i].name + " does not have a default value. Please" + " refer to the documentation.");
+			}
 
 			if (typeof options.flags[_i].default !== "undefined" && _typeof(options.flags[_i].default) !== options.flags[_i].type) {
 				throw new Error("Error creating command " + options.name + ": flag default value for flag " + options.flags[_i].name + " does not" + " match its data type. Please refer to the documentation.");
@@ -364,7 +373,9 @@ var Command = function () {
 
 			r += "\n" + this.desc;
 
-			if (Object.keys(this.args).length > 0) r += "\n\n" + str.help_av_args + ":\n\n" + args_table.toString();
+			if (Object.keys(this.args).length > 0) {
+				r += "\n\n" + str.help_av_args + ":\n\n" + args_table.toString();
+			}
 
 			// Add every flag, only if there are flags to add
 			if (Object.keys(this.flags).length > 0) {
@@ -386,7 +397,9 @@ var Command = function () {
 				r += "\n\n" + str.help_av_options + ":\n\n" + flags_table.toString();
 			}
 
-			if (Object.keys(this.args).length > 0) r += "\n\n" + str.help_args_required_optional;
+			if (Object.keys(this.args).length > 0) {
+				r += "\n\n" + str.help_args_required_optional;
+			}
 
 			return r;
 		}
