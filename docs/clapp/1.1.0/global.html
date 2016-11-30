@@ -22,7 +22,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Option.html">Option</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -114,352 +114,6 @@
 
         
                 
-<h4 class="name" id="argument">argument</h4>
-
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line98">line 98</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-        <th>Default</th>
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>The argument name. This options has two
-                                       purposes: to document the command help, and to
-                                       identify the option in the <code>argv.args</code> variable
-                                       passed back to the command function.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>desc</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>A description about what the argument is and
-                                       what information the user is expected to supply.
-                                       It is used to show the command help to the user.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>The argument data type, either <code>string</code> or
-                                       <code>number</code>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>required</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>false</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>Whether or not the argument is required for the
-                                       command to work. If the user fails to supply every
-                                       required argument, Clapp will warn them about the
-                                       problem and redirect them to the command help.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>default</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>A default value that will be passed into the
-                                       <code>argv.args</code> if the user does not supply a value.
-                                       This only works if <code>required</code> is set to false;
-                                       it has no effect otherwise. One of <code>required</code> or
-                                       <code>default</code> must be supplied. Not supplying either
-                                       would result in an error.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>validations</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="global.html#validation">validation</a>></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>An array with every validation check that you
-                                       want to perform on the user provided value. See
-                                       <a href="global.html#validation">validation</a>.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<div class="description">
-    <p>An argument is an option passed to the command. In the CLI sentence (See
-<a href="App.html#isCliSentence">App.isCliSentence</a>) <code>/testapp foo bar</code>, <code>bar</code> would be the
-value of the first argument.</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>var arg = {
-	name: 'file',
-	desc: 'The file where the data will be saved',
-	type: 'string',
-	required: false,
-	default: 'defaultfile.dat'
-}</code></pre>
-
-
-
-            
-                
 <h4 class="name" id="argv">argv</h4>
 
 
@@ -471,7 +125,7 @@ value of the first argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line299">line 299</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line306">line 306</a>
     </li></ul></dd>
     
 
@@ -633,7 +287,7 @@ value of the first argument.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line262">line 262</a>
+        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -761,6 +415,43 @@ value of the first argument.</p>
 
         <tr>
             
+                <td class="name"><code>default</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
+|
+
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A default value that will be passed into the
+                                            <code>argv.flags</code> if the user does not supply a
+                                            value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>desc</code></td>
             
 
@@ -789,49 +480,6 @@ value of the first argument.</p>
                                             what information the user is expected to
                                             supply. It is used to show the command
                                             help to the user.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>default</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">number</span>
-|
-
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>A default value that will be passed into the
-                                            <code>argv.flags</code> if the user does not supply a
-                                            value. While this is optional, it is
-                                            strongly encouraged that you supply it.
-                                            If you do not, when the user doesn't
-                                            provide the flag's value, you will get
-                                            null.</p></td>
         </tr>
 
     
@@ -963,7 +611,7 @@ flag the user passed, and its value would be <code>true</code>.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line101">line 101</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -1056,7 +704,7 @@ information see <a href="tutorial-Working-with-contexts.html">Working-with-conte
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line157">line 157</a>
+        <a href="Option.js.html">Option.js</a>, <a href="Option.js.html#line31">line 31</a>
     </li></ul></dd>
     
 
@@ -1238,7 +886,7 @@ problem.</p>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Nov 21 2016 20:42:25 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Nov 30 2016 20:27:32 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

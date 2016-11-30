@@ -2,7 +2,9 @@
 	"source": {
 		"include": [
 			"./lib/index.js",
-			"./lib/Command.js"
+			"./lib/Argument.js",
+			"./lib/Command.js",
+			"./lib/Option.js"
 		]
 	},
 	"opts": {

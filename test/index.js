@@ -280,6 +280,7 @@ describe('Clapp.App', function(){
 
 			app.addCommand(new Clapp.Command({
 				name: 'foo',
+				desc: 'desc',
 				fn: function(argv) {
 					passed = (argv.args.testarg === "defaultval" && argv.flags.testflag === 123)
 				},
@@ -287,6 +288,7 @@ describe('Clapp.App', function(){
 					{
 						name: "testarg",
 						type: "string",
+						desc: "desc",
 						required: false,
 						default: "defaultval"
 					}
@@ -295,6 +297,7 @@ describe('Clapp.App', function(){
 					{
 						name: "testflag",
 						type: "number",
+						desc: "desc",
 						default: 123
 					}
 				]
@@ -305,7 +308,59 @@ describe('Clapp.App', function(){
 			expect(passed).to.be.ok();
 		});
 
-		it('should show errors when options don\'t pass valiations');
+		it('should show errors when options don\'t pass validations', function(){
+			let passed;
+
+			let app = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'p',
+				onReply: function(msg){
+					passed = (msg.includes("firstError") && msg.includes("secondError"));
+				}
+			});
+
+			app.addCommand(new Clapp.Command({
+				name: 'foo',
+				desc: 'desc',
+				fn: function() {},
+				args: [
+					{
+						name: "testarg",
+						type: "string",
+						desc: "desc",
+						required: false,
+						default: "defaultval",
+						validations: [
+							{
+								errorMessage: "firstError",
+								validate: () => {
+									return false;
+								}
+							}
+						]
+					}
+				],
+				flags: [
+					{
+						name: "testflag",
+						type: "number",
+						desc: "desc",
+						default: 123,
+						validations: [
+							{
+								errorMessage: "secondError",
+								validate: () => {
+									return false;
+								}
+							}
+						]
+					}
+				]
+			}));
+
+			app.parseInput("p foo");
+
+			expect(passed).to.be.ok();
+		});
 
 		describe('async command handling', function(){
 
@@ -375,8 +430,34 @@ describe('Clapp.App', function(){
 					}, 25);
 				});
 
-				it('shouldn\'t do anything if the fulfill value is not string or object with' +
-					' string and context');
+				it('shouldn\'t do anything if the fulfilled value is not string or object with' +
+					' string and context', function(done){
+					let r = "didntDoAnything";
+					let foo = new Clapp.Command({
+						name: 'foo',
+						fn: function(argv, context) {
+							return new Promise((fulfill, reject) => {
+								setTimeout(function() {
+									fulfill(1234);
+								}, 10);
+							});
+						}
+					});
+
+					let app = new Clapp.App({
+						name: 'test', desc: 'desc', prefix: '/app',
+						onReply: function(msg) {
+							r = msg;
+						}, commands: [foo]
+					});
+
+					app.parseInput('/app foo');
+
+					setTimeout(function(){
+						expect(r).to.be("didntDoAnything");
+						done();
+					}, 25);
+				});
 
 				it('should handle rejects', function(done){
 					let r;
@@ -992,6 +1073,7 @@ describe('Clapp.App', function(){
 							{
 								name: "testarg",
 								type: "string",
+								desc: "desc",
 								required: true
 							}
 						]
@@ -1326,7 +1408,28 @@ describe('Clapp.Command', function(){
 			expect(thrown).to.eql(['a', 'b']);
 		});
 
-		it('should throw an Error when given a flag without a default value');
+		it('should throw an Error when given a flag without a default value', function(){
+			let thrown = [];
+
+			try {
+				new Clapp.Command({
+					name: 'foo',
+					fn: function (){},
+					desc: 'desc',
+					flags: [
+						{
+							name: 'testflag',
+							desc: 'A test flag',
+							alias: 't'
+						}
+					]
+				});
+			} catch(e) {
+				thrown.push('a');
+			}
+
+			expect(thrown).to.eql(['a']);
+		});
 
 		it('should throw an Error when given an invalid argument or flag type', function(){
 			let thrown = [];

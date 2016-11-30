@@ -22,7 +22,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Command.html">Command</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Option.html">Option</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -72,7 +72,7 @@ An App needs an onReply function to be able to communicate with the user.</p></d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line69">line 69</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -516,7 +516,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
 
     
 
-    <h4 class="name" id="addCommand"><span class="type-signature"></span>addCommand<span class="signature">(cmd)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="addCommand"><span class="type-signature"></span>addCommand<span class="signature">(cmd)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
@@ -528,7 +528,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line142">line 142</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line144">line 144</a>
     </li></ul></dd>
     
 
@@ -654,6 +654,24 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -661,7 +679,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
 
     
 
-    <h4 class="name" id="isCliSentence"><span class="type-signature"></span>isCliSentence<span class="signature">(sentence)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="isCliSentence"><span class="type-signature"></span>isCliSentence<span class="signature">(sentence)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
 
     
 
@@ -673,7 +691,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line404">line 404</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line417">line 417</a>
     </li></ul></dd>
     
 
@@ -795,6 +813,28 @@ app.isCliSentence('Hello, world!')       // False</code></pre>
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Whether or not the sentence is a CLI sentence.</p>
+</div>
+
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -802,7 +842,7 @@ app.isCliSentence('Hello, world!')       // False</code></pre>
 
     
 
-    <h4 class="name" id="parseInput"><span class="type-signature"></span>parseInput<span class="signature">(input, context)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="parseInput"><span class="type-signature"></span>parseInput<span class="signature">(input, context)</span><span class="type-signature"> &rarr; {undefined}</span></h4>
 
     
 
@@ -814,7 +854,7 @@ app.isCliSentence('Hello, world!')       // False</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line175">line 175</a>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line179">line 179</a>
     </li></ul></dd>
     
 
@@ -878,11 +918,11 @@ not) by using <a href="App.html#isCliSentence">isCliSentence</a>. Otherwise, Cla
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>app.parseInput('/testapp foo');        // Executes `foo`
-app.parseInput('/testapp foo --bar');  // Executes `foo` passing the --bar flag
-app.parseInput('/testapp foo --help'); // Shows the command help for `foo`
-app.parseInput('/testapp --help');     // Shows the app help
-app.parseInput('Not a CLI sentence');  // Throws an error. Make sure to validate
+    <pre class="prettyprint"><code>app.parseInput("/testapp foo");        // Executes `foo`
+app.parseInput("/testapp foo --bar");  // Executes `foo` passing the --bar flag
+app.parseInput("/testapp foo --help"); // Shows the command help for `foo`
+app.parseInput("/testapp --help");     // Shows the app help
+app.parseInput("Not a CLI sentence");  // Throws an error. Make sure to validate
                                        // user input with App.isCliSentence();</code></pre>
 
 
@@ -972,6 +1012,24 @@ app.parseInput('Not a CLI sentence');  // Throws an error. Make sure to validate
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl class="param-type">
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">undefined</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
         
@@ -992,7 +1050,7 @@ app.parseInput('Not a CLI sentence');  // Throws an error. Make sure to validate
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Nov 21 2016 20:42:25 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Nov 30 2016 20:27:32 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
