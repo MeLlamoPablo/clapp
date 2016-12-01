@@ -36,6 +36,7 @@ var Option = function () {
 		}
 		this.type = options.type;
 
+		/* eslint-disable */
 		/**
    * @typedef {object} validation
    *
@@ -66,15 +67,24 @@ var Option = function () {
    * set a wrong default value you might break your app.
    *
    * @example
-   * var myValidation = {
-   * 	errorMessage: "The number must be between 1 and 100!",
-   * 	validate: function (value) {
-   * 		return value >= 1 && value <= 100;
-   * 	}
-   * };
+   * let email = new Clapp.Argument({
+   * 	name: "email",
+   * 	desc: "The user's email",
+   * 	type: "string",
+   * 	required: true,
+   * 	validations: [
+   * 		{
+   * 			errorMessage: "This argument must be a valid email",
+   * 			validate: value => {
+   * 				return 	!!value.match(/\A[^@]+@[^@]+\z/);
+   * 			}
+   * 		}
+   * 	]
+   * });
    *
    * @since 1.0.0
    */
+		/* eslint-enable */
 		this.validations = options.validations || [];
 		for (var i in this.validations) {
 			var test = this._testValidation(options.validations[i]);

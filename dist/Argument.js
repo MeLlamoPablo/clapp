@@ -27,7 +27,7 @@ var Option = require("./Option");
  *
  * @param {string} options.desc
  *
- * A description about what the Argument is and  what information the user is expected to
+ * A description about what the Argument is and what information the user is expected to
  * supply. It is used to show the command help to the user.
  *
  * @param {string} options.type
@@ -70,7 +70,7 @@ var Argument = function (_Option) {
 
     var _this = _possibleConstructorReturn(this, (Argument.__proto__ || Object.getPrototypeOf(Argument)).call(this, options));
 
-    if (options.type !== "string" && options.type !== "number") {
+    if (_this.type !== "string" && _this.type !== "number") {
       throw new Error(_this._genErrStr("type is not string or number"));
     }
 

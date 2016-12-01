@@ -21,12 +21,12 @@ describe('Clapp.App', function(){
 
 	it('should add basic commands', function(){
 		let foo = new Clapp.Command({
-			name: 'foo',
+			name: 'foo', desc: 'desc',
 			fn: function() {}
 		});
 
 		let bar = new Clapp.Command({
-			name: 'bar',
+			name: 'bar', desc: 'desc',
 			fn: function() {}
 		});
 
@@ -52,7 +52,7 @@ describe('Clapp.App', function(){
 		});
 
 		app.addCommand(new Clapp.Command({
-			name: 'foo',
+			name: 'foo', desc: 'desc',
 			fn: function() {
 				executed = true;
 			}
@@ -67,7 +67,7 @@ describe('Clapp.App', function(){
 		it('should execute commands', function(){
 			let executed = false;
 			let foo = new Clapp.Command({
-				name: 'foo',
+				name: 'foo', desc: 'desc',
 				fn: function() {
 					executed = true;
 				}
@@ -155,7 +155,7 @@ describe('Clapp.App', function(){
 		it('should allow modifications in the context returning messages', function(){
 			let c;
 			let foo = new Clapp.Command({
-				name: 'foo',
+				name: 'foo', desc: 'desc',
 				fn: function(argv, context) {
 					context.push('b');
 					return {
@@ -180,7 +180,7 @@ describe('Clapp.App', function(){
 		it('should allow modifications in the context without returning messages', function(){
 			let c;
 			let foo = new Clapp.Command({
-				name: 'foo',
+				name: 'foo', desc: 'desc',
 				fn: function(argv, context) {
 					context.push('b');
 					return {
@@ -205,7 +205,7 @@ describe('Clapp.App', function(){
 			let version;
 
 			let foo = new Clapp.Command({
-				name: 'foo', fn: function() {}
+				name: 'foo', fn: function() {}, desc: 'desc',
 			});
 
 			let app = new Clapp.App({
@@ -224,7 +224,7 @@ describe('Clapp.App', function(){
 			let help;
 
 			let foo = new Clapp.Command({
-				name: 'foo', fn: function() {}
+				name: 'foo', desc: 'desc', fn: function() {}
 			});
 
 			let app = new Clapp.App({
@@ -369,7 +369,7 @@ describe('Clapp.App', function(){
 				it('should execute async commands', function(done){
 					let r;
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context) {
 							return new Promise((fulfill, reject) => {
 								setTimeout(function() {
@@ -397,7 +397,7 @@ describe('Clapp.App', function(){
 				it('should allow context modifications from async commands', function(done){
 					let r, c;
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context) {
 							return new Promise((fulfill, reject) => {
 								setTimeout(function() {
@@ -434,7 +434,7 @@ describe('Clapp.App', function(){
 					' string and context', function(done){
 					let r = "didntDoAnything";
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context) {
 							return new Promise((fulfill, reject) => {
 								setTimeout(function() {
@@ -462,7 +462,7 @@ describe('Clapp.App', function(){
 				it('should handle rejects', function(done){
 					let r;
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context) {
 							return new Promise((fulfill, reject) => {
 								setTimeout(function() {
@@ -494,7 +494,7 @@ describe('Clapp.App', function(){
 				it('should execute async commands', function(done){
 					let r;
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context, cb) {
 							setTimeout(function() {
 								cb('message');
@@ -521,7 +521,7 @@ describe('Clapp.App', function(){
 				it('should allow context modifications from async commands', function(done){
 					let r, c;
 					let foo = new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function(argv, context, cb) {
 							setTimeout(function() {
 								expect(context).to.be("old context");
@@ -1067,7 +1067,7 @@ describe('Clapp.App', function(){
 					});
 
 					app.addCommand(new Clapp.Command({
-						name: 'foo',
+						name: 'foo', desc: 'desc',
 						fn: function() {},
 						args: [
 							{
@@ -1242,14 +1242,23 @@ describe('Clapp.App', function(){
 			thrown.push('f');
 		}
 
-		expect(thrown).to.eql(['a', 'b', 'c', 'd', 'e', 'f']);
+		try {
+			new Clapp.App({
+				name: 'testapp', prefix: 'p', onReply: function(){},
+				commands: 'invalid commands'
+			});
+		} catch(e) {
+			thrown.push('g');
+		}
+
+		expect(thrown).to.eql(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
 	});
 });
 
 describe('Clapp.Command', function(){
 	it('should create basic commands', function(){
 		let foo = new Clapp.Command({
-			name: 'foo',
+			name: 'foo', desc: 'desc',
 			fn: function() {}
 		});
 
@@ -1284,6 +1293,83 @@ describe('Clapp.Command', function(){
 		expect(foo).to.be.a(Clapp.Command);
 		expect(foo.args).to.have.property('testarg');
 		expect(foo.flags).to.have.property('testflag');
+	});
+
+	it('should create commands with args and flags using the new API', function(){
+		let foo = new Clapp.Command({
+			name: 'foo',
+			desc: 'desc',
+			fn: function(argv, context) {},
+			args: [
+				new Clapp.Argument({
+					name: 'testarg',
+					desc: 'A test argument',
+					type: 'string',
+					required: false,
+					default: 'testarg isn\'t defined'
+				})
+			],
+			flags: [
+				new Clapp.Flag({
+					name: 'testflag',
+					desc: 'A test flag',
+					alias: 't',
+					type: 'boolean',
+					default: false
+				})
+			]
+		});
+
+		expect(foo).to.be.a(Clapp.Command);
+		expect(foo.args).to.have.property('testarg');
+		expect(foo.flags).to.have.property('testflag');
+	});
+
+	describe('#_getHelp()', function(){
+		it('should show app help', function(){
+			let response;
+
+			let app = new Clapp.App({
+				name: 'testapp',
+				desc: 'desc',
+				prefix: '-app',
+				onReply: msg => {
+					response = msg;
+				}
+			});
+
+			let foo = new Clapp.Command({
+				name: 'foo',
+				desc: 'desc',
+				fn: function() {},
+				args: [
+					{
+						name: 'testarg',
+						desc: 'A test argument',
+						type: 'string',
+						required: false,
+						default: 'testarg isn\'t defined'
+					}
+				],
+				flags: [
+					{
+						name: 'testflag',
+						desc: 'A test flag',
+						alias: 't',
+						type: 'boolean',
+						default: false
+					}
+				]
+			});
+
+			app.addCommand(foo);
+
+			app.parseInput("-app foo --help");
+
+			expect(response).to.contain(foo.name);
+			expect(response).to.contain("testarg");
+			expect(response).to.contain("testflag");
+		});
 	});
 
 	describe('error handling', function(){
@@ -1325,6 +1411,38 @@ describe('Clapp.Command', function(){
 			expect(thrown).to.eql(['a', 'b', 'c', 'd', 'e']);
 		});
 
+		it('should throw an Error when given wrong args/flags', function(){
+			let thrown = [];
+
+			try {
+				let foo = new Clapp.Command({
+					name: 'foo',
+					desc: 'desc',
+					fn: function(argv, context) {},
+					args: [
+						"not an argument"
+					]
+				});
+			} catch(e) {
+				thrown.push("a");
+			}
+
+			try {
+				let foo = new Clapp.Command({
+					name: 'foo',
+					desc: 'desc',
+					fn: function(argv, context) {},
+					flags: [
+						"not a flag"
+					]
+				});
+			} catch(e) {
+				thrown.push("b");
+			}
+
+			expect(thrown).to.eql(["a", "b"]);
+		});
+
 		it('should throw an Error when given an unnamed argument or flag', function(){
 			let thrown = [];
 
@@ -1353,6 +1471,48 @@ describe('Clapp.Command', function(){
 					flags: [
 						{
 							desc: 'A test flag',
+							alias: 't',
+							type: 'boolean',
+							default: false
+						}
+					]
+				});
+			} catch(e) {
+				thrown.push('b');
+			}
+
+			expect(thrown).to.eql(['a', 'b']);
+		});
+
+		it('should throw an Error when given an argument or flag without description',
+			function(){
+			let thrown = [];
+
+			try {
+				new Clapp.Command({
+					name: 'foo',
+					fn: function(){},
+					desc: 'desc',
+					args: [
+						{
+							name: 'testarg',
+							type: 'string',
+							required: true
+						}
+					]
+				});
+			} catch(e) {
+				thrown.push('a');
+			}
+
+			try {
+				new Clapp.Command({
+					name: 'foo',
+					fn: function(){},
+					desc: 'desc',
+					flags: [
+						{
+							name: 'testflag',
 							alias: 't',
 							type: 'boolean',
 							default: false
@@ -1793,5 +1953,118 @@ describe('Clapp.Command', function(){
 			expect(thrown).to.eql(['a', 'b', 'c', 'd1', 'd2', 'd3',
 				'e', 'f', 'g', 'h1', 'h2']);
 		});
+	});
+});
+
+describe('Clapp.Argument', function(){
+	it('should allow optional commands', function(){
+		let arg = new Clapp.Argument({
+			name: "testarg",
+			desc: "desc",
+			type: "string",
+			default: "abc"
+		});
+
+		let arg2 = new Clapp.Argument({
+			name: "testarg2",
+			desc: "desc",
+			type: "string",
+			required: false,
+			default: "abc"
+		});
+	});
+
+	it('should throw an error on type and default value mismatch, assuming that the argumnet is' +
+		' optional', function(){
+		let thrown = [];
+
+		try {
+			let arg = new Clapp.Argument({
+				name: "testarg",
+				desc: "desc",
+				type: "string",
+				required: false,
+				default: 123
+			});
+		} catch(e) {
+			thrown.push("a");
+		}
+
+		try {
+			let arg = new Clapp.Argument({
+				name: "testflag",
+				desc: "desc",
+				type: "number",
+				required: false,
+				default: "abc"
+			});
+		} catch(e) {
+			thrown.push("b");
+		}
+
+		expect(thrown).to.eql(["a", "b"]);
+	});
+
+	it('should throw an error when, being optional, not given a default value', function(){
+		let thrown = [];
+
+		try {
+			let arg = new Clapp.Argument({
+				name: "testarg",
+				desc: "desc",
+				type: "string",
+				required: false
+			});
+		} catch(e) {
+			thrown.push("a");
+		}
+
+		expect(thrown).to.eql(["a"]);
+	});
+});
+
+describe('Clapp.Flag', function(){
+	it('should throw an error when not given a default value', function(){
+		let thrown = [];
+
+		try {
+			let flag = new Clapp.Flag({
+				name: "testflag",
+				desc: "desc",
+				type: "string"
+			});
+		} catch(e) {
+			thrown.push("a");
+		}
+
+		expect(thrown).to.eql(["a"]);
+	});
+
+	it('should throw an error on type and default value mismatch', function(){
+		let thrown = [];
+
+		try {
+			let flag = new Clapp.Flag({
+				name: "testflag",
+				desc: "desc",
+				type: "string",
+				default: 123
+			});
+		} catch(e) {
+			thrown.push("a");
+		}
+
+		try {
+			let flag = new Clapp.Flag({
+				name: "testflag",
+				desc: "desc",
+				type: "number",
+				default: "abc"
+			});
+		} catch(e) {
+			thrown.push("b");
+		}
+
+		expect(thrown).to.eql(["a", "b"]);
 	});
 });

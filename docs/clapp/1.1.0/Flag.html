@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Command - Documentation</title>
+    <title>Flag - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Command</h1>
+    <h1 class="page-title">Flag</h1>
     
 
     
@@ -40,8 +40,15 @@
 <header>
     
         <h2>
-        Command
+        Flag
         </h2>
+        
+            <div class="class-description"><p>Flag</p>
+<p>A flag is an option passed to a <a href="Command.html">Command</a>. Unlike arguments, flags are optional by
+nature, meaning that you can't require the user to pass a flag. Flags always have a full
+name, and may have aliases (i.e: <code>--debug</code> and <code>-d</code>). In the CLI sentence (See
+<a href="App.html#isCliSentence">App.isCliSentence</a>) <code>/testapp foo --bar</code>, <code>bar</code> would be the
+flag the user passed, and its value would be <code>true</code>.</p></div>
         
     
 </header>
@@ -52,8 +59,10 @@
         
 
     
+    <h2>Constructor</h2>
+    
 
-    <h4 class="name" id="Command"><span class="type-signature"></span>new Command<span class="signature">(options)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Flag"><span class="type-signature"></span>new Flag<span class="signature">(options)</span><span class="type-signature"></span></h4>
 
     
 
@@ -65,7 +74,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Command.js.html">Command.js</a>, <a href="Command.js.html#line7">line 7</a>
+        <a href="Flag.js.html">Flag.js</a>, <a href="Flag.js.html#line54">line 54</a>
     </li></ul></dd>
     
 
@@ -104,12 +113,6 @@
 
 
 
-<div class="description">
-    <p>A Command that can be bound to an App. A command represents a single function that achieves a
-single purpose. The command can receive arguments and flags, and can return a string that will be
-redirected to the app output (See: <a href="global.html#onReply">onReply</a>).</p>
-</div>
-
 
 
 
@@ -120,33 +123,13 @@ redirected to the app output (See: <a href="global.html#onReply">onReply</a>).</
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>var foo = new Clapp.Command({
-	name: "foo",
-	desc: "does foo things",
-	fn: function(argv, context) {
-		console.log("foo was executed!");
-	},
-	args: [
-		new Clapp.Argument({
-			name: "testarg",
-			desc: "A test argument",
-			type: "string",
-			required: false,
-			default: "testarg isn't defined"
-		})
-	],
-	flags: [
-		new Clapp.Flag({
-			name: "testflag",
-			desc: "A test flag",
-			alias: 't',
-			type: "boolean",
-			default: false
-		})
-	],
-});
-
-app.addCommand(foo);</code></pre>
+    <pre class="prettyprint"><code>let flag = new Clapp.Flag({
+	name: "limit",
+	desc: "The number of items that will be shown. Can\'t be higher than 50",
+	type: "number",
+	alias: "l",
+	default: 10
+});</code></pre>
 
 
 
@@ -210,8 +193,6 @@ app.addCommand(foo);</code></pre>
         
 
         
-        <th>Default</th>
-        
 
         <th class="last">Description</th>
     </tr>
@@ -245,50 +226,9 @@ app.addCommand(foo);</code></pre>
             
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last"><p>The command's name. The command will be invoked  by writing the app prefix followed by a
-space and the command's name.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fn</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>The function that will be executed when the command is invoked. The function receives the
-following params: <a href="global.html#argv">argv</a> and context. For more information, see
-<a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a>.</p></td>
+            <td class="description last"><p>The Flag name. This options has two  purposes: to document the command help, and to
+identify the option in the <code>argv.args</code> variable passed back to the command function.</p></td>
         </tr>
 
     
@@ -318,25 +258,22 @@ following params: <a href="global.html#argv">argv</a> and context. For more info
             
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last"><p>A description of what the command does.</p></td>
+            <td class="description last"><p>A description about what the Flag is and what information the user is expected to
+supply. It is used to show the command help to the user.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>args</code></td>
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="Argument.html">Argument</a>></span>
+<span class="param-type">string</span>
 
 
             
@@ -345,8 +282,6 @@ following params: <a href="global.html#argv">argv</a> and context. For more info
             
                 <td class="attributes">
                 
-                    &lt;optional><br>
-                
 
                 
 
@@ -355,61 +290,26 @@ following params: <a href="global.html#argv">argv</a> and context. For more info
             
 
             
-                <td class="default">
-                
-                </td>
-            
 
-            <td class="description last"><p>An array with every argument supported by the command. See <a href="Argument.html">Argument</a>.</p></td>
+            <td class="description last"><p>The Flag data type, either <code>string</code> or <code>number</code>, or <code>boolean</code></p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>flags</code></td>
+                <td class="name"><code>default</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;flag></span>
+<span class="param-type">string</span>
+|
 
+<span class="param-type">number</span>
+|
 
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>An array with every flag supported by the command. See flag.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>async</code></td>
-            
-
-            <td class="type">
-            
-                
 <span class="param-type">boolean</span>
 
 
@@ -419,6 +319,37 @@ following params: <a href="global.html#argv">argv</a> and context. For more info
             
                 <td class="attributes">
                 
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>A default value that will be passed into the <code>argv.args</code> if the user does not supply a value.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>alias</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
                     &lt;optional><br>
                 
 
@@ -429,17 +360,43 @@ following params: <a href="global.html#argv">argv</a> and context. For more info
             
 
             
-                <td class="default">
+
+            <td class="description last"><p>A string of only one character containing the alias of the flag. If the alias of <code>limit</code> is
+<code>l</code>, then <code>--limit=15</code> will have the same effect as <code>-l 15</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>validations</code></td>
+            
+
+            <td class="type">
+            
                 
-                    <code>false</code>
+<span class="param-type">Array.&lt;validation></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
                 
                 </td>
             
 
-            <td class="description last"><p>DEPRECATED since 1.1.0. Use Promises instead, see <a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a>.
-Whether or not the command's function is asynchronous. If it is, it will receive a third
-parameter: callback, that you will need to call when the process is over. See
-<a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a>.</p></td>
+            
+
+            <td class="description last"><p>An array with every validation check that you want to perform on the user provided value. See
+validation.</p></td>
         </tr>
 
     

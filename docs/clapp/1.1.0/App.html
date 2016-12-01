@@ -22,7 +22,7 @@
 <label for="nav-trigger" class="overlay"></label>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Option.html">Option</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Flag.html">Flag</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <div id="main">
@@ -72,7 +72,7 @@ An App needs an onReply function to be able to communicate with the user.</p></d
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line68">line 68</a>
+        <a href="App.js.html">App.js</a>, <a href="App.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -123,12 +123,12 @@ An App needs an onReply function to be able to communicate with the user.</p></d
     
     <pre class="prettyprint"><code>const Clapp = require('clapp');
 
-var myApp = new Clapp.App({
+let myApp = new Clapp.App({
 	name: "Test App",
 	desc: "An app created with Clapp!",
 	prefix: "-testapp", // Commands will have this structure: -testapp foo --bar
 	version: "1.2.0",
-	onReply: function (msg, context) {
+	onReply: (msg, context) => {
 		// Called when the App shows output
 		console.log(msg);
 	},
@@ -528,7 +528,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line144">line 144</a>
+        <a href="App.js.html">App.js</a>, <a href="App.js.html#line144">line 144</a>
     </li></ul></dd>
     
 
@@ -585,7 +585,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
     <pre class="prettyprint"><code>app.addCommand(new Clapp.Command({
 	name: "foo",
 	desc: "An example command",
-	fn : function(argv, context) {
+	fn : (argv, context) => {
 		console.log("foo was executed");
 	}
 })):</code></pre>
@@ -691,7 +691,7 @@ bound using <a href="App.html#addCommand">App#addCommand</a>.</p></td>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line417">line 417</a>
+        <a href="App.js.html">App.js</a>, <a href="App.js.html#line417">line 417</a>
     </li></ul></dd>
     
 
@@ -854,7 +854,7 @@ app.isCliSentence('Hello, world!')       // False</code></pre>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line179">line 179</a>
+        <a href="App.js.html">App.js</a>, <a href="App.js.html#line179">line 179</a>
     </li></ul></dd>
     
 
@@ -902,7 +902,7 @@ are prompted with the app general help, or the command specific help.</p>
 <p>Please note the following:</p>
 <ul>
 <li>The input is not sanitized. It is your responsibility to do so.</li>
-<li>It would be a good idea to sanitize your input by using <a href="global.html#validation">validations</a>.</li>
+<li>It would be a good idea to sanitize your input by using validations.</li>
 <li>It is also imperative that you make sure that the input is a CLI sentence (valid or
 not) by using <a href="App.html#isCliSentence">isCliSentence</a>. Otherwise, Clapp will throw an error.</li>
 </ul>
@@ -1050,7 +1050,7 @@ app.parseInput("Not a CLI sentence");  // Throws an error. Make sure to validate
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Nov 30 2016 20:27:32 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Dec 01 2016 19:41:05 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

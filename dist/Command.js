@@ -7,36 +7,48 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Argument = require("./Argument"),
+    Flag = require("./Flag"),
     Table = require("cli-table2"),
     str = require("./strings/en.js");
 
+/* eslint-disable no-trailing-spaces */
 /**
  * A Command that can be bound to an App. A command represents a single function that achieves a
  * single purpose. The command can receive arguments and flags, and can return a string that will be
  * redirected to the app output (See: {@link onReply}).
  *
  * @class  Command
- * @param {object}        options               The command options
- * @param {string}        options.name          The command's name. The command will be invoked
- *                                              by writing the app prefix followed by a space
- *                                              and the command's name.
- * @param {function}      options.fn            The function that will be executed when the command
- *                                              is invoked. The function receives the following
- *                                              params: {@link argv} and context. For more
- *                                              information, see {@tutorial
- *                                              Defining-the-command-function}.
- * @param {string}        [options.desc]        A description of what the command does.
- * @param {Argument[]}    [options.args]        An array with every argument supported by the
- *                                              command. See {@link Argument}.
- * @param {flag[]}        [options.flags]       An array with every flag supported by the command.
- *                                              See {@link flag}.
- * @param {boolean}       [options.async=false] DEPRECATED since 1.1.0. Use Promises instead, see
- *                                              {@tutorial Defining-the-command-function}.
- *                                              Whether or not the command's function is
- *                                              asynchronous. If it is, it will receive a third
- *                                              parameter: callback, that you will need to call when
- *                                              the process is over. See {@tutorial
- *                                              Defining-the-command-function}.
+ *
+ * @param {object} options
+ *
+ * @param {string} options.name
+ *
+ * The command's name. The command will be invoked  by writing the app prefix followed by a
+ * space and the command's name.
+ *
+ * @param {function} options.fn
+ *
+ * The function that will be executed when the command is invoked. The function receives the
+ * following params: {@link argv} and context. For more information, see
+ * {@tutorial Defining-the-command-function}.
+ *
+ * @param {string} options.desc
+ *
+ * A description of what the command does.
+ *
+ * @param {Argument[]} [options.args]
+ *
+ * An array with every argument supported by the command. See {@link Argument}.
+ * @param {flag[]} [options.flags]
+ *
+ * An array with every flag supported by the command. See {@link flag}.
+ *
+ * @param {boolean} [options.async=false]
+ *
+ * DEPRECATED since 1.1.0. Use Promises instead, see {@tutorial Defining-the-command-function}.
+ * Whether or not the command's function is asynchronous. If it is, it will receive a third
+ * parameter: callback, that you will need to call when the process is over. See
+ * {@tutorial Defining-the-command-function}.
  *
  * @example
  * var foo = new Clapp.Command({
@@ -46,35 +58,36 @@ var Argument = require("./Argument"),
  * 		console.log("foo was executed!");
  * 	},
  * 	args: [
- * 		{
+ * 		new Clapp.Argument({
  * 			name: "testarg",
  * 			desc: "A test argument",
  * 			type: "string",
  * 			required: false,
  * 			default: "testarg isn't defined"
- * 		}
+ * 		})
  * 	],
  * 	flags: [
- * 		{
+ * 		new Clapp.Flag({
  * 			name: "testflag",
  * 			desc: "A test flag",
  * 			alias: 't',
  * 			type: "boolean",
  * 			default: false
- * 		}
+ * 		})
  * 	],
  * });
  *
  * app.addCommand(foo);
  */
+/* eslint-enable */
 
 var Command = function () {
 	function Command(options) {
 		_classCallCheck(this, Command);
 
 		if (typeof options.name !== "string" || // name is required
-		options.name === "" || typeof options.fn !== "function" || // fn is required
-		options.desc && typeof options.desc !== "string" || // options is not required
+		options.name === "" || typeof options.desc !== "string" || // desc is required
+		options.desc === "" || typeof options.fn !== "function" || // fn is required
 		options.args && !Array.isArray(options.args) || // args is not required
 		options.flags && !Array.isArray(options.flags) || // flags is not required
 		options.async && typeof options.async !== "boolean" // async is not required
@@ -85,7 +98,7 @@ var Command = function () {
 			}
 
 		this.name = options.name;
-		this.desc = options.desc || null;
+		this.desc = options.desc;
 		this.async = options.async || false;
 		this.fn = options.fn;
 		this.suppressDeprecationWarnings = options.suppressDeprecationWarnings;
@@ -93,6 +106,7 @@ var Command = function () {
 		this.args = {};
 		options.args = options.args || [];
 		for (var i = 0; i < options.args.length; i++) {
+
 			if (options.args[i] instanceof Argument) {
 				this.args[options.args[i].name] = options.args[i];
 			} else if (_typeof(options.args[i]) === "object") {
@@ -103,110 +117,18 @@ var Command = function () {
 			}
 		}
 
-		// TODO create Flag class
-		/**
-   * @typedef {object} flag
-   *
-   * A flag is an option passed to the command. Unlike arguments, flags are optional by
-   * nature, meaning that you can't require the user to pass a flag. Flags always have a full
-   * name, and may have aliases (i.e: `--debug` and `-d`). In the CLI sentence (See
-   * [App.isCliSentence]{@link App#isCliSentence}) `/testapp foo --bar`, `bar` would be the
-   * flag the user passed, and its value would be `true`.
-   *
-   * @property {string}                name      The flag name. This options has two
-   *                                             purposes: to document the command help,
-   *                                             and to identify the option in the
-   *                                             `argv.flags` variable passed back to the
-   *                                             command function.
-   * @property {string}                type      The flag data type, either `string`,
-   *                                             `number` or `boolean`.
-   * @property {string|number|boolean} default   A default value that will be passed into the
-   *                                             `argv.flags` if the user does not supply a
-   *                                             value.
-   * @property {string}                [desc]    A description about what the flag is and
-   *                                             what information the user is expected to
-   *                                             supply. It is used to show the command
-   *                                             help to the user.
-   * @property {string}                [alias]   A string of only one character containing
-   *                                             the alias of the flag. If the alias of
-   *                                             `limit` is `l`, then `--limit=15` will
-   *                                             have the same effect as `-l 15`.
-   * @property {validation[]}      [validations] An array with every validation check that you
-   *                                             want to perform on the user provided
-   *                                             value. See {@link validation}.
-   *
-   * @example
-   * var flag = {
-   * 	name: 'limit',
-   * 	desc: 'The number of items that will be shown. Can\'t be higher than 50',
-   * 	type: 'number',
-   * 	alias: 'l',
-   * 	default: 10
-   * }
-   */
 		this.flags = {};
 		options.flags = options.flags || [];
 		for (var _i = 0; _i < options.flags.length; _i++) {
-			if (typeof options.flags[_i].name !== "string") {
-				throw new Error("Error creating command " + options.name + ": unnamed flag. Please refer to the documentation.");
+
+			if (options.flags[_i] instanceof Flag) {
+				this.flags[options.flags[_i].name] = options.flags[_i];
+			} else if (_typeof(options.flags[_i]) === "object") {
+				// Give support to the deprecated API
+				this.flags[options.flags[_i].name] = new Flag(options.flags[_i]);
+			} else {
+				throw new Error("One of the items in the flags array is not a Flag.");
 			}
-
-			if (typeof options.flags[_i].type !== "string") {
-				throw new Error("Error creating command " + options.name + ": unspecified flag type. Please refer to the documentation.");
-			}
-
-			if (options.flags[_i].type !== "boolean" && options.flags[_i].type !== "string" && options.flags[_i].type !== "number") {
-				throw new Error("Error creating command " + options.name + ": flag types can only be boolean, string or number. Please refer to the" + " documentation.");
-			}
-
-			if (typeof options.flags[_i].alias === "string" && options.flags[_i].alias.length !== 1) {
-				throw new Error("Error creating command " + options.name + ": aliases can only be one character long.");
-			}
-
-			if (typeof options.flags[_i].default === "undefined") {
-				throw new Error("Error creating command " + options.name + ": flag " + options.flags[_i].name + " does not have a default value. Please" + " refer to the documentation.");
-			}
-
-			if (typeof options.flags[_i].default !== "undefined" && _typeof(options.flags[_i].default) !== options.flags[_i].type) {
-				throw new Error("Error creating command " + options.name + ": flag default value for flag " + options.flags[_i].name + " does not" + " match its data type. Please refer to the documentation.");
-			}
-
-			var validations = options.flags[_i].validations || [];
-			if (!Array.isArray(validations)) {
-				throw new Error("Error creating command " + options.name + ": validations must" + " be in an array.");
-			}
-
-			for (var j = 0; j < validations.length; j++) {
-				if (typeof validations[j].errorMessage !== "string" || typeof validations[j].validate !== "function") {
-					throw new Error("Error creating command " + options.name + ": a provided" + " validation is missing one of their parameters. Please refer to the" + " documentation.");
-				}
-
-				// Test the validation to check if it returns a boolean
-				var testVal = void 0;
-				switch (options.flags[_i].type) {
-					case "string":
-						testVal = "Clapp is testing your validation. Please don't panic.";
-						break;
-					case "number":
-						testVal = 123456;
-						break;
-					case "boolean":
-						// does it really make sense to validate a boolean though?
-						testVal = true;
-				}
-
-				if (typeof validations[j].validate(testVal) !== "boolean") {
-					throw new Error("Error creating command " + options.name + ": one of your" + " validations was tested, but it didn't return a boolean value.");
-				}
-			}
-
-			this.flags[options.flags[_i].name] = {
-				type: options.flags[_i].type,
-				alias: options.flags[_i].alias || null,
-				default: typeof options.flags[_i].default === "undefined" ? null : options.flags[_i].default,
-				desc: options.flags[_i].desc || null,
-				validations: validations
-			};
 		}
 	}
 
