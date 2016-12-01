@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Tutorial: Defining-the-command-function - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Flag.html">Flag</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Tutorial: Defining-the-command-function</h1>
+    
+
+    <section>
+
+<header>
+    
+
+    <h2>Defining-the-command-function</h2>
+</header>
+
+<article>
+    <h1>Defining the command function</h1><p>The documentation shows a very basic example of what a command is: when the user executes <code>foo</code>, <code>console.log('foo was executed');</code>. However, there's two parameters that Clapp passes back to your command:</p>
+<ul>
+<li><code>argv</code> contains the arguments and flags, and</li>
+<li><code>context</code> contains your own information. See &quot;working-with-contexts&quot; for further info about contexts.</li>
+</ul>
+<h2>The <code>argv</code> object</h2><p>The <code>argv</code> object contains two children:</p>
+<ul>
+<li><code>argv.args</code>, and</li>
+<li><code>argv.flags</code>.</li>
+</ul>
+<p>Both objects contain children objects with your data. So if you define the following flag:</p>
+<pre class="prettyprint source lang-javascript"><code>var flag = {
+    name: &quot;limit&quot;,
+    desc: &quot;The number of items that will be shown.&quot;,
+    type: &quot;number&quot;,
+    alias: &quot;l&quot;,
+    default: 10
+}</code></pre><p>And the user runs:</p>
+<pre class="prettyprint source lang-javascript"><code>app.parseInput(&quot;/testapp foo -l 25&quot;);</code></pre><p>Then you get:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    console.log(argv.flags.limit); // 25
+}</code></pre><p>If the user ran:</p>
+<pre class="prettyprint source lang-javascript"><code>app.parseInput(&quot;/testapp foo&quot;);</code></pre><p>Then you'd get:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    console.log(argv.flags.limit); // 10, because it's the default value.
+}</code></pre><h2>Returning data</h2><p>Generally, you want to return a message to the user with the feedback about the operation they just did.</p>
+<h4>Returning a message</h4><p>In your command function, you can <code>return</code> a <code>string</code> that will be redirected to your <code>onReply</code> function (in the <code>msg</code> parameter), using the same context that was passed into your command function. For instance:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    if (argv.flags.iAmHappy) {
+        return &quot;Awesome! :)&quot;;
+    } else {
+        return &quot;Then smile! :)&quot;;
+    }
+}</code></pre><h4>Modifying the context</h4><p>If you also need to pass your own data to your <code>onReply</code> function, you can modify the context, and <code>return</code> an <code>object</code> containing two properties: <code>message</code> and <code>context</code>. For instance:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    if (argv.flags.iAmHappy) {
+        return {
+            message: &quot;Awesome&quot;,
+            context: {
+                userIsHappy: true
+            }
+        };
+    } else {
+        return {
+            message: &quot;Then smile! :)&quot;,
+            context: {
+                userIsHappy: false
+            }
+        };
+    }
+}</code></pre><p>To learn more about contexts, see <a href="tutorial-Working-with-contexts.html">Working with contexts</a>.</p>
+<h4>Not doing anything</h4><p>If you don't want to send a message, return something that is neither <code>string</code>, <code>object</code> nor
+ <code>Promise</code>, or just don't return nothing at all.</p>
+<h2>Asynchronous functions</h2><p>In some cases, you might need your command's <code>fn</code> to behave asynchronously. In order to do so, 
+you can return a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise"><code>Promise</code></a>,
+and instead of returning your data through the <code>return</code> statement, you can return it inside the 
+promise using the <code>fulfill</code> function:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    return new Promise((fulfill, reject) => {
+        doTheThing().then(() => {
+            fulfill(&quot;I'm done!&quot;);
+        });
+    });
+}</code></pre><p>Of course, the examples above still apply: you can modify the context from within the <code>Promise</code>:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    return new Promise((fulfill, reject) => {
+        doTheThing().then((bar) => {
+            context.bar = bar;
+            fulfill({
+                message: &quot;I'm done!&quot;,
+                context: context
+            });
+        });
+    });
+}</code></pre><h4>Rejecting the promise</h4><p>Typically, when you're dealing with Promises, you're also dealing with error handling; the async 
+functions that you invoke inside your command's function may return errors. If you encounter any 
+of them, you might be inclined to log them to the console:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    return new Promise((fulfill, reject) => {
+        doTheThing().then(() => {
+            fulfill(&quot;I'm done!&quot;);
+        }).catch(err => {
+            console.error(err);
+        });
+    });
+}</code></pre><p>However, this doesn't let the user know about what happened. To solve this, you can use the 
+<code>reject</code> function to pass the error back to Clapp:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    return new Promise((fulfill, reject) => {
+        doTheThing().then(() => {
+            fulfill(&quot;I'm done!&quot;);
+        }).catch(err => {
+            reject(err);
+        });
+    });
+}</code></pre><p>Which can be simplified to:</p>
+<pre class="prettyprint source lang-javascript"><code>// Command function
+function(argv, context) {
+    return new Promise((fulfill, reject) => {
+        doTheThing().then(() => {
+            fulfill(&quot;I'm done!&quot;);
+        }).catch(reject);
+    });
+}</code></pre><p>This will log the error to the console, and send the following message to the output: <code>An internal
+error occurred while trying to execute the command &lt;command&gt;.</code>. You should only use the <code>reject</code> 
+function for errors that don't concern the user. For example, &quot;the connection to the database 
+can't be established&quot;, or &quot;there is a syntax error on your code&quot;. The end user probably doesn't 
+care, so the standard message is good enough. It's best to avoid using this function for errors 
+that concern them, such as &quot;this element can't be found in the database&quot;. To alert the user about
+ that, just use <code>fulfill</code>.</p>
+</article>
+
+</section>
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Dec 01 2016 19:52:31 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
