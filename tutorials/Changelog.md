@@ -1,6 +1,9 @@
 # Changelog
 
 * v1.1.0
+	* Added {@link Argument} and {@link Flag}. Deprecated declaring args and flags with objects, 
+    though it still works.
+	* Commands must now have a description.
 	* Flags now must have a default value.
 	* Added support for [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise). Deprecated `async` attribute.
 * v1.0.1
