@@ -419,7 +419,7 @@ var App = function () {
 		value: function _getHelp() {
 			var LINE_WIDTH = 100;
 
-			var r = this.name + (typeof this.version !== "undefined" ? " v" + this.version : "") + "\n" + this.desc + "\n\n" + str.help_usage + this.prefix + " " + str.help_command + "\n\n" + str.help_cmd_list + "\n\n";
+			var r = this.name + (typeof this.version !== "undefined" ? " v" + this.version : "") + "\n" + this.desc + "\n\n" + str.help_usage + this.prefix + this.separator + str.help_command + "\n\n" + str.help_cmd_list + "\n\n";
 
 			// Command list
 			var table = new Table({

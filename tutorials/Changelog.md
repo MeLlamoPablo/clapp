@@ -1,5 +1,8 @@
 # Changelog
 
+* v1.1.1
+	* Minor fix when generating App help. See
+	[issue](https://github.com/MeLlamoPablo/clapp/issues/1#issuecomment-265963359).
 * v1.1.0
 	* Added {@link Argument} and {@link Flag}. Deprecated declaring args and flags with objects, 
     though it still works.
