@@ -4,7 +4,8 @@
 			"./lib/App.js",
 			"./lib/Argument.js",
 			"./lib/Command.js",
-			"./lib/Flag.js"
+			"./lib/Flag.js",
+			"./lib/Option.js"
 		]
 	},
 	"opts": {
