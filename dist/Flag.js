@@ -101,7 +101,7 @@ var Flag = function (_Option) {
     if (options.caseSensitive && typeof options.caseSensitive !== "boolean") {
       throw new Error(_this._genErrStr("the case sensitive option is not a boolean value"));
     }
-    _this.caseSensitive = options.caseSensitive;
+    _this.caseSensitive = typeof options.caseSensitive === "boolean" ? options.caseSensitive : true;
     return _this;
   }
 

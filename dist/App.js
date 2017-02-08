@@ -326,10 +326,8 @@ var App = function () {
 								userValue = argv[flag.alias];
 							} else {
 								// If the flag is case sensitive, just check if the user has passed it
-								if (flag.caseSensitive) {
-									if (typeof argv[_name] !== "undefined") {
-										userValue = null;
-									}
+								if (flag.caseSensitive && typeof argv[_name] !== "undefined") {
+									userValue = argv[_name];
 								} else {
 									// If not, compare every flag the user passed against this one.
 									for (var userInputFlag in argv) {

@@ -1,5 +1,8 @@
 # Changelog
 
+* v1.2.0
+	* Added option `caseSensitive` with default value `true` to: {@link App}, {@link Command} and
+	{@link Flag}.
 * v1.1.1
 	* Minor fix when generating App help. See
 	[issue](https://github.com/MeLlamoPablo/clapp/issues/1#issuecomment-265963359).
