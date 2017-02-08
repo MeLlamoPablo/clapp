@@ -39,6 +39,10 @@ var Command = require("./Command.js"),
  * A function that allows the App to communicate with the end user. When the App needs to show an
  * output, the onReply function will be executed.
  *
+ * @param {boolean} [options.caseSensitive=true]
+ *
+ * Whether or not the app's prefix is case sensitive.
+ *
  * @param {string} [options.version]
  *
  * The app's version. It will be used to document the app's help.
@@ -85,6 +89,7 @@ var App = function () {
 		typeof options.onReply !== "function" || // onReply is required
 		options.commands && !Array.isArray(options.commands) || // commands are not required
 		options.version && typeof options.version !== "string" || // version is not required
+		options.caseSensitive && typeof options.caseSensitive !== "boolean" || // caseSensitive is not required
 		options.separator && typeof options.separator !== "string" // separator is not required
 
 		) {
@@ -94,6 +99,7 @@ var App = function () {
 		this.name = options.name;
 		this.desc = options.desc;
 		this.prefix = options.prefix;
+		this.caseSensitive = typeof options.caseSensitive === "boolean" ? options.caseSensitive : true;
 		this.version = typeof options.version === "string" ? options.version : undefined;
 		// doing options.separator || ' ' would invalidate the separator being ''
 		this.separator = typeof options.separator !== "undefined" ? options.separator : " ";
@@ -195,10 +201,29 @@ var App = function () {
 			var argv = parseSentence(input.replace(this.prefix + this.separator, ""));
 
 			// Find whether or not the requested command exists
-			var cmd = this.commands[argv._[0]];
-			if (typeof cmd === "undefined") {
+			var cmd = null;
+			var userInputCommand = argv._[0];
+			for (var name in this.commands) {
+				var command = this.commands[name];
+
+				var validCommandName = command.caseSensitive ? name : name.toLowerCase();
+				var validUserInput = command.caseSensitive ? userInputCommand : userInputCommand.toLowerCase();
+
+				if (validCommandName === validUserInput) {
+					cmd = command;
+					break;
+				}
+			}
+
+			if (!cmd) {
 				// The command doesn't exist. Four scenarios possible:
-				if (argv.help || input === this.prefix) {
+				var _getValidPrefixes2 = this._getValidPrefixes(input),
+				    validPrefix = _getValidPrefixes2.validPrefix,
+				    userPrefix = _getValidPrefixes2.userPrefix;
+
+				var validInput = this._getValidUserInput(input, userPrefix);
+
+				if (argv.help || validInput === validPrefix) {
 					// The help flag was passed OR the user typed just the command prefix.
 					// Show app help.
 					this.reply(this._getHelp(), context);
@@ -241,24 +266,47 @@ var App = function () {
 						// Give values to every argument
 						j = 1;
 						for (var _i2 in cmd.args) {
+							var arg = cmd.args[_i2];
+
 							final_argv.args[_i2] = argv._[j];
 
 							// If the arg wasn't supplied and it has a default value, use it
-							if (typeof final_argv.args[_i2] === "undefined" && typeof cmd.args[_i2].default !== "undefined") {
-								final_argv.args[_i2] = cmd.args[_i2].default;
+							if (typeof final_argv.args[_i2] === "undefined" && typeof arg.default !== "undefined") {
+								final_argv.args[_i2] = arg.default;
 							}
 
 							// Convert it to the correct type, and register errors.
-							final_argv.args[_i2] = App._convertType(final_argv.args[_i2], cmd.args[_i2].type);
+							final_argv.args[_i2] = App._convertType(final_argv.args[_i2], arg.type);
 
 							if (_typeof(final_argv.args[_i2]) === "object") {
 								errors.push("Error on argument " + _i2 + ": expected " + final_argv.args[_i2].expectedType + ", got " + final_argv.args[_i2].providedType + " instead.");
 							} else {
 								// If the user input matches the required data type, perform every
 								// validation, if there's any:
-								for (var k = 0; k < cmd.args[_i2].validations.length; k++) {
-									if (!cmd.args[_i2].validations[k].validate(final_argv.args[_i2])) {
-										errors.push("Error on argument " + _i2 + ": " + cmd.args[_i2].validations[k].errorMessage);
+								var _iteratorNormalCompletion = true;
+								var _didIteratorError = false;
+								var _iteratorError = undefined;
+
+								try {
+									for (var _iterator = arg.validations[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+										var validation = _step.value;
+
+										if (!validation.validate(final_argv.args[_i2])) {
+											errors.push("Error on argument " + _i2 + ": " + validation.errorMessage);
+										}
+									}
+								} catch (err) {
+									_didIteratorError = true;
+									_iteratorError = err;
+								} finally {
+									try {
+										if (!_iteratorNormalCompletion && _iterator.return) {
+											_iterator.return();
+										}
+									} finally {
+										if (_didIteratorError) {
+											throw _iteratorError;
+										}
 									}
 								}
 							}
@@ -267,26 +315,47 @@ var App = function () {
 						}
 
 						// Give values to every flag
-						for (var _i3 in cmd.flags) {
-							if (typeof argv[_i3] === "undefined" || argv[_i3] === null) {
-								// The user didn't specify the flag, but might have specified the alias
-								final_argv.flags[_i3] = argv[cmd.flags[_i3].alias] || cmd.flags[_i3].default;
+						for (var _name in cmd.flags) {
+							var flag = cmd.flags[_name];
+							var userValue = null;
+
+							// Check if the user has passed the alias.
+							// Otherwise check if the user has passed the flag.
+							if (typeof argv[flag.alias] !== "undefined") {
+								// The user has passed the alias.
+								userValue = argv[flag.alias];
 							} else {
-								// The user specified the flag
-								final_argv.flags[_i3] = argv[_i3];
+								// If the flag is case sensitive, just check if the user has passed it
+								if (flag.caseSensitive) {
+									if (typeof argv[_name] !== "undefined") {
+										userValue = null;
+									}
+								} else {
+									// If not, compare every flag the user passed against this one.
+									for (var userInputFlag in argv) {
+										// _ represents the command and arguments;
+										// we don't care about those.
+										if (userInputFlag !== "_" && _name.toLowerCase() === userInputFlag.toLowerCase()) {
+
+											userValue = argv[userInputFlag];
+										}
+									}
+								}
 							}
 
-							// Convert it to the correct type, and register errors.
-							final_argv.flags[_i3] = App._convertType(final_argv.flags[_i3], cmd.flags[_i3].type);
+							final_argv.flags[_name] = userValue !== null ? userValue : flag.default;
 
-							if (_typeof(final_argv.flags[_i3]) === "object") {
-								errors.push("Error on flag " + _i3 + ": expected " + final_argv.flags[_i3].expectedType + ", got " + final_argv.flags[_i3].providedType + " instead.");
+							// Convert it to the correct type, and register errors.
+							final_argv.flags[_name] = App._convertType(final_argv.flags[_name], flag.type);
+
+							if (_typeof(final_argv.flags[_name]) === "object") {
+								errors.push("Error on flag " + _name + ": expected " + final_argv.flags[_name].expectedType + ", got " + final_argv.flags[_name].providedType + " instead.");
 							} else {
 								// If the user input matches the required data type, perform every
 								// validation, if there's any:
-								for (var _k = 0; _k < cmd.flags[_i3].validations.length; _k++) {
-									if (!cmd.flags[_i3].validations[_k].validate(final_argv.flags[_i3])) {
-										errors.push("Error on flag " + _i3 + ": " + cmd.flags[_i3].validations[_k].errorMessage);
+								for (var k = 0; k < flag.validations.length; k++) {
+									if (!flag.validations[k].validate(final_argv.flags[_name])) {
+										errors.push("Error on flag " + _name + ": " + flag.validations[k].errorMessage);
 									}
 								}
 							}
@@ -318,8 +387,8 @@ var App = function () {
         */
 
 							// The property async is deprecated, but we still give support to it
-							if (!this.commands[argv._[0]].async) {
-								response = this.commands[argv._[0]].fn(final_argv, context);
+							if (!cmd.async) {
+								response = cmd.fn(final_argv, context);
 
 								if (response instanceof Promise) {
 									// Even though the async attribute is set to false, the command
@@ -334,7 +403,7 @@ var App = function () {
 											_this.reply(actualResponse.message, actualResponse.context);
 										}
 									}).catch(function (err) {
-										_this.reply(str.err_internal_error.replace("%CMD%", _this.commands[argv._[0]].name), context);
+										_this.reply(str.err_internal_error.replace("%CMD%", cmd.name), context);
 										console.error(err);
 									});
 								} else if (typeof response === "string") {
@@ -345,7 +414,7 @@ var App = function () {
 							} else {
 								(function () {
 									var self = _this;
-									_this.commands[argv._[0]].fn(final_argv, context, function cb(response, newContext) {
+									cmd.fn(final_argv, context, function cb(response, newContext) {
 										if (typeof response === "string") {
 											if (typeof newContext !== "undefined") {
 												self.reply(response, newContext);
@@ -355,7 +424,7 @@ var App = function () {
 										}
 									});
 
-									if (!_this.commands[argv._[0]].suppressDeprecationWarnings) {
+									if (!cmd.suppressDeprecationWarnings) {
 										/* istanbul ignore next */
 										console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
 									}
@@ -363,8 +432,8 @@ var App = function () {
 							}
 						} else {
 							response = str.err + str.err_type_mismatch + "\n\n";
-							for (var _i4 = 0; _i4 < errors.length; _i4++) {
-								response += errors[_i4] + "\n";
+							for (var _i3 = 0; _i3 < errors.length; _i3++) {
+								response += errors[_i3] + "\n";
 							}
 							this.reply(response, context);
 						}
@@ -390,7 +459,16 @@ var App = function () {
 	}, {
 		key: "isCliSentence",
 		value: function isCliSentence(sentence) {
-			return sentence === this.prefix || sentence.substring(0, this.prefix.length + this.separator.length) === this.prefix + this.separator;
+			var _getValidPrefixes3 = this._getValidPrefixes(sentence),
+			    validPrefix = _getValidPrefixes3.validPrefix,
+			    userPrefix = _getValidPrefixes3.userPrefix;
+
+			// Replace the user-introduced prefix with the userPrefix variable
+
+
+			var userSentence = this._getValidUserInput(sentence, userPrefix);
+
+			return userSentence === validPrefix || userPrefix === validPrefix + this.separator;
 		}
 
 		/**
@@ -407,8 +485,41 @@ var App = function () {
    */
 
 	}, {
-		key: "_getHelp",
+		key: "_getValidPrefixes",
 
+
+		/**
+   * Parses the app prefix and user inputted prefix to take into account case insensitivity.
+   *
+   * @param {string} input The user input.
+   * @return {{validPrefix: string, userPrefix: string}} An object containint the result.
+   * @private
+   */
+		value: function _getValidPrefixes(input) {
+			var validPrefix = this.caseSensitive ? this.prefix : this.prefix.toLowerCase();
+			var userPrefix = input.substring(0, this.prefix.length + this.separator.length);
+			userPrefix = this.caseSensitive ? userPrefix : userPrefix.toLowerCase();
+
+			return {
+				validPrefix: validPrefix,
+				userPrefix: userPrefix
+			};
+		}
+
+		/**
+   * Converts the user input to a "valid" input which takes into account case insensitivity.
+   *
+   * @param {string} input The user input
+   * @param {string} userPrefix The result of _getValidPrefixes()
+   * @return {string} The parsed input
+   * @private
+   */
+
+	}, {
+		key: "_getValidUserInput",
+		value: function _getValidUserInput(input, userPrefix) {
+			return userPrefix + input.substring(this.prefix.length + this.separator.length);
+		}
 
 		/**
    * Returns the global app help
@@ -416,6 +527,9 @@ var App = function () {
    * @return {string} The App Help
    * @private
    */
+
+	}, {
+		key: "_getHelp",
 		value: function _getHelp() {
 			var LINE_WIDTH = 100;
 

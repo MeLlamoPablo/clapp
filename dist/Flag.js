@@ -45,6 +45,11 @@ var Option = require("./Option");
  * A string of only one character containing the alias of the flag. If the alias of `limit` is
  * `l`, then `--limit=15` will have the same effect as `-l 15`.
  *
+ * @param {boolean} [options.caseSensitive=true]
+ *
+ * Whether or not the flag is case sensitive. This doesn't affect aliases, which are always case
+ * sensitive.
+ *
  * @param {validation[]} [options.validations]
  *
  * An array with every validation check that you want to perform on the user provided value. See
@@ -92,6 +97,11 @@ var Flag = function (_Option) {
     if (_typeof(_this.default) !== _this.type) {
       throw new Error(_this._genErrStr("its default value doesn't match its data type"));
     }
+
+    if (options.caseSensitive && typeof options.caseSensitive !== "boolean") {
+      throw new Error(_this._genErrStr("the case sensitive option is not a boolean value"));
+    }
+    _this.caseSensitive = options.caseSensitive;
     return _this;
   }
 

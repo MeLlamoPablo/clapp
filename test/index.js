@@ -362,6 +362,70 @@ describe('Clapp.App', function(){
 			expect(passed).to.be.ok();
 		});
 
+		it('should allow case insensitive app prefixes', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'tEsTaPp',
+				onReply: function(msg){r = msg},
+				caseSensitive: false
+			});
+
+			a.parseInput("TESTAPP");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql(a._getHelp());
+		});
+
+		it('should allow case insensitive commands', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'testapp',
+				onReply: function(msg){r = msg}
+			});
+
+			a.addCommand(new Clapp.Command({
+				name: 'fOo', desc: 'desc', fn: function() {return "hello world!"},
+				caseSensitive: false
+			}));
+
+			a.parseInput("testapp FOO");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql("hello world!");
+		});
+
+		it('should allow case insensitive flags', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'testapp',
+				onReply: function(msg){r = msg}
+			});
+
+			a.addCommand(new Clapp.Command({
+				name: 'foo', desc: 'desc', fn: function(argv) {
+					if (argv.flags.mYfLaG) {
+						return ":)";
+					} else {
+						return ":(";
+					}
+				},
+				flags: [
+					new Clapp.Flag({
+						name: "mYfLaG", desc: "desc", type: "boolean", default: false,
+						caseSensitive: false
+					})
+				]
+			}));
+
+			a.parseInput("testapp foo --MYFLAG");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql(":)");
+		});
+
 		describe('async command handling', function(){
 
 			describe('with Promise', function () {
