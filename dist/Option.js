@@ -56,8 +56,8 @@ var Option = function () {
    * - It receives a single parameter: the user provided value.
    * - It needs to return true if the validation is passed, or false if it isn't. Any
    * other return value will result in an exception.
-   * - Clapp tests your validations when you construct the command, so don't panic if you
-   * see an unexpected `console.log` or something similar.
+   * - Clapp tests your validations when you construct the argument or flag, so don't panic
+   * if you see an unexpected `console.log` or something similar.
    * - Validations cannot be asynchronous. Any asynchronous operation needs to be
    * inside your command's fn.
    * - No validation will be performed if the user input doesn't match the required
@@ -76,7 +76,7 @@ var Option = function () {
    * 		{
    * 			errorMessage: "This argument must be a valid email",
    * 			validate: value => {
-   * 				return 	!!value.match(/\A[^@]+@[^@]+\z/);
+   * 				return !!value.match(/\A[^@]+@[^@]+\z/);
    * 			}
    * 		}
    * 	]

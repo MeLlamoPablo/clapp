@@ -116,7 +116,7 @@ describe('Clapp.App', function(){
 				onReply: function() {}, commands: [foo]
 			});
 
-			app.parseInput('/app foo argument -t');
+			app.parseInput('/app foo argument --testflag');
 
 			expect(passed_argv.args.testarg).to.be('argument');
 			expect(passed_argv.flags.testflag).to.be(true);
@@ -360,6 +360,70 @@ describe('Clapp.App', function(){
 			app.parseInput("p foo");
 
 			expect(passed).to.be.ok();
+		});
+
+		it('should allow case insensitive app prefixes', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'tEsTaPp',
+				onReply: function(msg){r = msg},
+				caseSensitive: false
+			});
+
+			a.parseInput("TESTAPP");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql(a._getHelp());
+		});
+
+		it('should allow case insensitive commands', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'testapp',
+				onReply: function(msg){r = msg}
+			});
+
+			a.addCommand(new Clapp.Command({
+				name: 'fOo', desc: 'desc', fn: function() {return "hello world!"},
+				caseSensitive: false
+			}));
+
+			a.parseInput("testapp FOO");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql("hello world!");
+		});
+
+		it('should allow case insensitive flags', function() {
+			let r;
+
+			let a = new Clapp.App({
+				name: 'testapp', desc: 'desc', prefix: 'testapp',
+				onReply: function(msg){r = msg}
+			});
+
+			a.addCommand(new Clapp.Command({
+				name: 'foo', desc: 'desc', fn: function(argv) {
+					if (argv.flags.mYfLaG) {
+						return ":)";
+					} else {
+						return ":(";
+					}
+				},
+				flags: [
+					new Clapp.Flag({
+						name: "mYfLaG", desc: "desc", type: "boolean", default: false,
+						caseSensitive: false
+					})
+				]
+			}));
+
+			a.parseInput("testapp foo --MYFLAG");
+
+			//noinspection JSAccessibilityCheck
+			expect(r).to.eql(":)");
 		});
 
 		describe('async command handling', function(){
@@ -1251,7 +1315,26 @@ describe('Clapp.App', function(){
 			thrown.push('g');
 		}
 
-		expect(thrown).to.eql(['a', 'b', 'c', 'd', 'e', 'f', 'g']);
+		try {
+			new Clapp.App({
+				name: 'test', desc: 'desc', prefix: '/app', onReply: function() {},
+				caseSensitive: "no"
+			});
+		} catch(e) {
+			thrown.push('h');
+		}
+
+		try {
+			new Clapp.App({
+				name: 'test', desc: 'desc', prefix: '/app', onReply: function() {},
+				separator: 123
+			});
+		} catch(e) {
+			thrown.push('i');
+		}
+
+
+		expect(thrown).to.eql(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']);
 	});
 });
 
@@ -2066,5 +2149,24 @@ describe('Clapp.Flag', function(){
 		}
 
 		expect(thrown).to.eql(["a", "b"]);
+	});
+
+	it('should throw an error when given optional parameters with the wrong type', function(){
+		let thrown = [];
+
+		try {
+			let flag = new Clapp.Flag({
+				name: "testflag",
+				desc: "desc",
+				type: "string",
+				default: "abc",
+				caseSensitive: "true"
+			});
+		} catch(e) {
+			thrown.push("a");
+		}
+
+		expect(thrown).to.eql(["a"]);
+
 	});
 });

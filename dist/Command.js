@@ -39,9 +39,13 @@ var Argument = require("./Argument"),
  * @param {Argument[]} [options.args]
  *
  * An array with every argument supported by the command. See {@link Argument}.
- * @param {flag[]} [options.flags]
+ * @param {Flag[]} [options.flags]
  *
- * An array with every flag supported by the command. See {@link flag}.
+ * An array with every flag supported by the command. See {@link Flag}.
+ *
+ * @param {boolean} [options.caseSensitive=true]
+ *
+ * Whether or not the command is case sensitive.
  *
  * @param {boolean} [options.async=false]
  *
@@ -90,6 +94,7 @@ var Command = function () {
 		options.desc === "" || typeof options.fn !== "function" || // fn is required
 		options.args && !Array.isArray(options.args) || // args is not required
 		options.flags && !Array.isArray(options.flags) || // flags is not required
+		options.caseSensitive && typeof options.caseSensitive !== "boolean" || // caseSensitive is not required
 		options.async && typeof options.async !== "boolean" // async is not required
 
 
@@ -101,6 +106,7 @@ var Command = function () {
 		this.desc = options.desc;
 		this.async = options.async || false;
 		this.fn = options.fn;
+		this.caseSensitive = typeof options.caseSensitive === "boolean" ? options.caseSensitive : true;
 		this.suppressDeprecationWarnings = options.suppressDeprecationWarnings;
 
 		this.args = {};
