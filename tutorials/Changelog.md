@@ -1,5 +1,8 @@
 # Changelog
 
+* v1.2.1
+	* Fixed numbers exceeding `Number.MAX_SAFE_INTEGER` losing precision even if treated as strings
+	(see [issue](https://github.com/MeLlamoPablo/clapp/issues/7)).
 * v1.2.0
 	* Added option `caseSensitive` with default value `true` to: {@link App}, {@link Command} and
 	{@link Flag}.
