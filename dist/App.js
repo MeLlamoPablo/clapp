@@ -173,7 +173,7 @@ var App = function () {
    * not) by using [isCliSentence]{@link App#isCliSentence}. Otherwise, Clapp will throw an error.
    *
    * @param {string} input A CLI sentence. See [isCliSentence]{@link App#isCliSentence}.
-   * @param {*} context The context to retrieve later. See {@tutorial Working-with-contexts}.
+   * @param {*} [context] The context to retrieve later. See {@tutorial Working-with-contexts}.
    * @return {undefined}
    *
    * @example
