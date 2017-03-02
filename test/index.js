@@ -63,6 +63,22 @@ describe('Clapp.App', function(){
 		expect(executed).to.be.ok();
 	});
 
+	it('should support custom strings', function(){
+		let response;
+
+		let app = new Clapp.App({
+			name: 'test', desc: 'desc', prefix: '-app',
+			onReply: msg => response = msg,
+			strings: {
+				help_usage: "CUSTOM_STRING"
+			}
+		});
+
+		app.parseInput("-app");
+
+		expect(response).to.contain("CUSTOM_STRING");
+	});
+
 	describe('#parseInput()', function(){
 		it('should execute commands', function(){
 			let executed = false;

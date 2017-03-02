@@ -1,5 +1,8 @@
 # Changelog
 
+* v1.3.0
+	* Added the option `strings` to {@link App} to allow overriding the default message strings
+	(see [pr](https://github.com/MeLlamoPablo/clapp/pull/9)).
 * v1.2.1
 	* Fixed numbers exceeding `Number.MAX_SAFE_INTEGER` losing precision even if treated as strings
 	(see [issue](https://github.com/MeLlamoPablo/clapp/issues/7)).

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Option.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="App.html">App</a><ul class='methods'><li data-type='method'><a href="App.html#addCommand">addCommand</a></li><li data-type='method'><a href="App.html#isCliSentence">isCliSentence</a></li><li data-type='method'><a href="App.html#parseInput">parseInput</a></li></ul></li><li><a href="Argument.html">Argument</a></li><li><a href="Command.html">Command</a></li><li><a href="Flag.html">Flag</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Changelog.html">Changelog</a></li><li><a href="tutorial-Defining-the-command-function.html">Defining-the-command-function</a></li><li><a href="tutorial-Overriding-the-default-help-generators.html">Overriding-the-default-help-generators</a></li><li><a href="tutorial-Working-with-contexts.html">Working-with-contexts</a></li></ul><h3><a href="global.html">Global</a></h3>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">Option.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable */
+/**
+ * @class Option
+ * @private
+ *
+ * An Option is a type that can become an Argument or a Flag.
+ *
+ * @param {object} options
+ * @param {string} options.name
+ * @param {string} options.desc
+ * @param {string} options.type
+ */
+/* eslint-enable */
+class Option {
+	constructor(options) {
+		if (typeof options.name !== "string") {
+			throw new Error("Error: unnamed " + this.constructor.name.toLowerCase() +
+				". Please refer to the documentation.");
+		}
+		this.name = options.name;
+
+		if (typeof options.desc !== "string") {
+			throw new Error(this._genErrStr("no description provided"));
+		}
+		this.desc = options.desc;
+
+		if (typeof options.type !== "string") {
+			throw new Error(this._genErrStr("no type provided"));
+		}
+		this.type = options.type;
+
+		/* eslint-disable */
+		/**
+		 * @typedef {object} validation
+		 *
+		 * A validation is a single check that you want to perform on an user provided value
+		 * before executing your command. If the validation isn't passed, the command won't
+		 * be executed at all, and the user will receive an error informing them about the
+		 * problem.
+		 *
+		 * @property {string} errorMessage
+		 *
+		 * A string with the error message shown to the user in case the validation isn't
+		 * passed.
+		 *
+		 * @property {function} validate
+		 *
+		 * The validation function, which follows these rules:
+		 * - It receives a single parameter: the user provided value.
+		 * - It needs to return true if the validation is passed, or false if it isn't. Any
+		 * other return value will result in an exception.
+		 * - Clapp tests your validations when you construct the argument or flag, so don't panic
+		 * if you see an unexpected `console.log` or something similar.
+		 * - Validations cannot be asynchronous. Any asynchronous operation needs to be
+		 * inside your command's fn.
+		 * - No validation will be performed if the user input doesn't match the required
+		 * data type.
+		 * - Trivia: your default values also get validated, because they get treated as
+		 * user input. This isn't really useful, but watch out, because if you mistakenly
+		 * set a wrong default value you might break your app.
+		 *
+		 * @example
+		 * let email = new Clapp.Argument({
+		 * 	name: "email",
+		 * 	desc: "The user's email",
+		 * 	type: "string",
+		 * 	required: true,
+		 * 	validations: [
+		 * 		{
+		 * 			errorMessage: "This argument must be a valid email",
+		 * 			validate: value => {
+		 * 				return !!value.match(/\A[^@]+@[^@]+\z/);
+		 * 			}
+		 * 		}
+		 * 	]
+		 * });
+		 *
+		 * @since 1.0.0
+		 */
+		/* eslint-enable */
+		this.validations = options.validations || [];
+		for (let i in this.validations) {
+			let test = this._testValidation(options.validations[i]);
+
+			if (!test.result) {
+				throw new Error(this._genErrStr("one of its validations " + test.reason));
+			}
+		}
+	}
+
+	/**
+	 * Determines whether or not a validation is correct, meaning that it has an errorMessage
+	 * and a validate function, and that function returns a boolean value.
+	 * @param {validation} validation The validation we're evaluating.
+	 * @return {object} An object containing two properties: (boolean) result and (string) reason.
+	 *                  reason is undefined in case of success.
+	 * @private
+	 */
+	_testValidation(validation) {
+		if (
+			typeof validation.errorMessage !== "string" ||
+			typeof validation.validate     !== "function"
+		) {
+			return {
+				result: false,
+				reason: "is missing one of its parameters"
+			};
+		}
+
+		// Test the validation to check if it returns a boolean
+		let testVal;
+		switch (this.type) {
+			case "string":
+				testVal = "Clapp is testing your validation. Please don't panic.";
+				break;
+			case "number":
+				testVal = 123456;
+				break;
+		}
+
+		if (typeof validation.validate(testVal) !== "boolean") {
+			return {
+				result: false,
+				reason: "was tested and it didn't return a boolean value"
+			};
+		}
+
+		return { result: true };
+	}
+
+	/**
+	 * Generates an error string based on an error message and the instance type (Argument or Flag)
+	 *
+	 * @param {string} err The custom error message.
+	 * @returns {string} The generated error message.
+	 * @private
+	 */
+	_genErrStr(err) {
+		return "Error when creating " + this.constructor.name.toLowerCase() +
+			" \"" + this.name + "\": " + err + ". Please refer to the" +
+			" documentation.";
+	}
+}
+
+module.exports = Option;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Mar 02 2017 13:51:05 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

@@ -8,8 +8,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Command = require("./Command.js"),
     Table = require("cli-table2"),
-    parseSentence = require("minimist-string"),
-    str = require("./strings/en.js");
+    defaultStr = require("./strings/en.js"),
+    parseSentence = require("minimist-string");
 
 /* eslint-disable valid-jsdoc - syntax error for some reason? */
 /**
@@ -59,6 +59,11 @@ var Command = require("./Command.js"),
  * An array of commands that will immediately be bound to the app. Additional commands can be later
  * bound using {@link App#addCommand}.
  *
+ * @param {StringsObject} [options.strings]
+ *
+ * An object containing at least one valid string from the {@link StringsObject}, that will override
+ * the default strings. Use it to customize the messages that are sent to the user.
+ *
  * @example
  * const Clapp = require('clapp');
  *
@@ -71,7 +76,10 @@ var Command = require("./Command.js"),
  * 		// Called when the App shows output
  * 		console.log(msg);
  * 	},
- * 	commands: [myCommand1, myCommand2]
+ * 	commands: [myCommand1, myCommand2],
+ * 	strings: {
+ * 		help_usage: "Here's how you use this: "
+ * 	}
  * });
  *
  * myApp.addCommand(myCommand3);
@@ -90,7 +98,8 @@ var App = function () {
 		options.commands && !Array.isArray(options.commands) || // commands are not required
 		options.version && typeof options.version !== "string" || // version is not required
 		options.caseSensitive && typeof options.caseSensitive !== "boolean" || // caseSensitive is not required
-		options.separator && typeof options.separator !== "string" // separator is not required
+		options.separator && typeof options.separator !== "string" || // separator is not required
+		options.strings && _typeof(options.strings) !== "object" // strings is not required
 
 		) {
 				throw new Error("Wrong options passed into the Clapp constructor. " + "Please refer to the documentation.");
@@ -103,6 +112,7 @@ var App = function () {
 		this.version = typeof options.version === "string" ? options.version : undefined;
 		// doing options.separator || ' ' would invalidate the separator being ''
 		this.separator = typeof options.separator !== "undefined" ? options.separator : " ";
+		this.str = Object.assign({}, defaultStr, options.strings);
 
 		/**
    * @typedef {function} onReply
@@ -232,7 +242,7 @@ var App = function () {
 					this.reply("v" + this.version, context);
 				} else {
 					// The user made a mistake. Let them know.
-					this.reply(str.err + str.err_unknown_command.replace("%CMD%", argv._[0]) + " " + str.err_type_help.replace("%PREFIX%", this.prefix), context);
+					this.reply(this.str.err + this.str.err_unknown_command.replace("%CMD%", argv._[0]) + " " + this.str.err_type_help.replace("%PREFIX%", this.prefix), context);
 				}
 			} else {
 				// The command exists. Three scenarios possible:
@@ -252,11 +262,11 @@ var App = function () {
 					}
 
 					if (Object.keys(unfulfilled_args).length > 0) {
-						var r = str.err + str.err_unfulfilled_args + "\n";
+						var r = this.str.err + this.str.err_unfulfilled_args + "\n";
 						for (var _i in unfulfilled_args) {
 							r += _i + "\n";
 						}
-						r += "\n" + str.err_type_help.replace("%PREFIX%", this.prefix + " " + argv._[0]);
+						r += "\n" + this.str.err_type_help.replace("%PREFIX%", this.prefix + " " + argv._[0]);
 
 						this.reply(r, context);
 					} else {
@@ -401,7 +411,7 @@ var App = function () {
 											_this.reply(actualResponse.message, actualResponse.context);
 										}
 									}).catch(function (err) {
-										_this.reply(str.err_internal_error.replace("%CMD%", cmd.name), context);
+										_this.reply(_this.str.err_internal_error.replace("%CMD%", cmd.name), context);
 										console.error(err);
 									});
 								} else if (typeof response === "string") {
@@ -410,26 +420,24 @@ var App = function () {
 									this.reply(response.message, response.context);
 								}
 							} else {
-								(function () {
-									var self = _this;
-									cmd.fn(final_argv, context, function cb(response, newContext) {
-										if (typeof response === "string") {
-											if (typeof newContext !== "undefined") {
-												self.reply(response, newContext);
-											} else {
-												self.reply(response, context);
-											}
+								var self = this;
+								cmd.fn(final_argv, context, function cb(response, newContext) {
+									if (typeof response === "string") {
+										if (typeof newContext !== "undefined") {
+											self.reply(response, newContext);
+										} else {
+											self.reply(response, context);
 										}
-									});
-
-									if (!cmd.suppressDeprecationWarnings) {
-										/* istanbul ignore next */
-										console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
 									}
-								})();
+								});
+
+								if (!cmd.suppressDeprecationWarnings) {
+									/* istanbul ignore next */
+									console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
+								}
 							}
 						} else {
-							response = str.err + str.err_type_mismatch + "\n\n";
+							response = this.str.err + this.str.err_type_mismatch + "\n\n";
 							for (var _i3 = 0; _i3 < errors.length; _i3++) {
 								response += errors[_i3] + "\n";
 							}
@@ -490,7 +498,7 @@ var App = function () {
    * Parses the app prefix and user inputted prefix to take into account case insensitivity.
    *
    * @param {string} input The user input.
-   * @return {{validPrefix: string, userPrefix: string}} An object containint the result.
+   * @return {{validPrefix: string, userPrefix: string}} An object containing the result.
    * @private
    */
 		value: function _getValidPrefixes(input) {
@@ -531,7 +539,7 @@ var App = function () {
 		value: function _getHelp() {
 			var LINE_WIDTH = 100;
 
-			var r = this.name + (typeof this.version !== "undefined" ? " v" + this.version : "") + "\n" + this.desc + "\n\n" + str.help_usage + this.prefix + this.separator + str.help_command + "\n\n" + str.help_cmd_list + "\n\n";
+			var r = this.name + (typeof this.version !== "undefined" ? " v" + this.version : "") + "\n" + this.desc + "\n\n" + this.str.help_usage + this.prefix + this.separator + this.str.help_command + "\n\n" + this.str.help_cmd_list + "\n\n";
 
 			// Command list
 			var table = new Table({
@@ -549,7 +557,7 @@ var App = function () {
 				table.push([i, this.commands[i].desc]);
 			}
 
-			r += table.toString() + "\n\n" + str.help_further_help + this.prefix + " " + str.help_command + " --help";
+			r += table.toString() + "\n\n" + this.str.help_further_help + this.prefix + " " + this.str.help_command + " --help";
 
 			return r;
 		}
