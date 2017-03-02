@@ -1,5 +1,11 @@
 "use strict";
 
+/**
+ * @typedef {object} StringsObject
+ *
+ * An object defining the strings that will be used by Clapp to communicate with the users.
+ * Click on the `source` link above in order to see which strings can be overridden.
+ */
 module.exports = {
 
 	// Help
