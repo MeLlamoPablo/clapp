@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Flag - Documentation</title>
+    <title>Argument - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Flag</h1>
+    <h1 class="page-title">Argument</h1>
     
 
     
@@ -40,15 +40,13 @@
 <header>
     
         <h2>
-        Flag
+        Argument
         </h2>
         
-            <div class="class-description"><p>Flag</p>
-<p>A flag is an option passed to a <a href="Command.html">Command</a>. Unlike arguments, flags are optional by
-nature, meaning that you can't require the user to pass a flag. Flags always have a full
-name, and may have aliases (i.e: <code>--debug</code> and <code>-d</code>). In the CLI sentence (See
-<a href="App.html#isCliSentence">App.isCliSentence</a>) <code>/testapp foo --bar</code>, <code>bar</code> would be the
-flag the user passed, and its value would be <code>true</code>.</p></div>
+            <div class="class-description"><p>Argument</p>
+<p>An argument is an option passed to a <a href="Command.html">Command</a>. In the CLI sentence (See
+<a href="App.html#isCliSentence">App.isCliSentence</a>) <code>/testapp foo bar</code>, <code>bar</code> would be the
+value of the first argument.</p></div>
         
     
 </header>
@@ -62,7 +60,7 @@ flag the user passed, and its value would be <code>true</code>.</p></div>
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Flag"><span class="type-signature"></span>new Flag<span class="signature">(options)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Argument"><span class="type-signature"></span>new Argument<span class="signature">(options)</span><span class="type-signature"></span></h4>
 
     
 
@@ -74,7 +72,7 @@ flag the user passed, and its value would be <code>true</code>.</p></div>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Flag.js.html">Flag.js</a>, <a href="Flag.js.html#line59">line 59</a>
+        <a href="Argument.js.html">Argument.js</a>, <a href="Argument.js.html#line55">line 55</a>
     </li></ul></dd>
     
 
@@ -123,12 +121,12 @@ flag the user passed, and its value would be <code>true</code>.</p></div>
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>let flag = new Clapp.Flag({
-	name: "limit",
-	desc: "The number of items that will be shown. Can\'t be higher than 50",
-	type: "number",
-	alias: "l",
-	default: 10
+    <pre class="prettyprint"><code>let arg = new Clapp.Argument({
+	name: "file",
+	desc: "The file where the data will be saved",
+	type: "string",
+	required: false,
+	default: "defaultfile.dat"
 });</code></pre>
 
 
@@ -233,7 +231,7 @@ flag the user passed, and its value would be <code>true</code>.</p></div>
                 </td>
             
 
-            <td class="description last"><p>The Flag name. This options has two  purposes: to document the command help, and to
+            <td class="description last"><p>The Argument name. This options has two  purposes: to document the command help, and to
 identify the option in the <code>argv.args</code> variable passed back to the command function.</p></td>
         </tr>
 
@@ -269,7 +267,7 @@ identify the option in the <code>argv.args</code> variable passed back to the co
                 </td>
             
 
-            <td class="description last"><p>A description about what the Flag is and what information the user is expected to
+            <td class="description last"><p>A description about what the Argument is and what information the user is expected to
 supply. It is used to show the command help to the user.</p></td>
         </tr>
 
@@ -305,7 +303,48 @@ supply. It is used to show the command help to the user.</p></td>
                 </td>
             
 
-            <td class="description last"><p>The Flag data type, either <code>string</code> or <code>number</code>, or <code>boolean</code></p></td>
+            <td class="description last"><p>The Argument data type, either <code>string</code> or <code>number</code>.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>required</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether or not the Argument is required for the command to work. If the user fails to supply
+every required Argument, Clapp will warn them about the problem and redirect them to the
+command help.</p></td>
         </tr>
 
     
@@ -322,44 +361,6 @@ supply. It is used to show the command help to the user.</p></td>
 |
 
 <span class="param-type">number</span>
-|
-
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last"><p>A default value that will be passed into the <code>argv.args</code> if the user does not supply a value.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>alias</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
 
 
             
@@ -383,48 +384,9 @@ supply. It is used to show the command help to the user.</p></td>
                 </td>
             
 
-            <td class="description last"><p>A string of only one character containing the alias of the flag. If the alias of <code>limit</code> is
-<code>l</code>, then <code>--limit=15</code> will have the same effect as <code>-l 15</code>.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>caseSensitive</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                    <code>true</code>
-                
-                </td>
-            
-
-            <td class="description last"><p>Whether or not the flag is case sensitive. This doesn't affect aliases, which are always case
-sensitive.</p></td>
+            <td class="description last"><p>A default value that will be passed into the <code>argv.args</code> if the user does not supply a value.
+This only works if <code>required</code> is set to false; it has no effect otherwise. If <code>required</code> is
+set to false (its default value), then <code>default</code> is mandatory.</p></td>
         </tr>
 
     
@@ -523,7 +485,7 @@ sensitive.</p></td>
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Mar 02 2017 12:04:10 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu Mar 02 2017 13:51:05 GMT+0100 (CET) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>
