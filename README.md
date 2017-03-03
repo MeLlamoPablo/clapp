@@ -18,9 +18,9 @@ $ npm install --save clapp
 ## Usage
 
 ```js
-var Clapp = require('clapp');
+const Clapp = require('clapp');
 
-var app = new Clapp.App({
+let app = new Clapp.App({
 	name: "Test App",
 	desc: "An app that does the thing",
 	prefix: "-testapp",
@@ -40,7 +40,7 @@ app.addCommand(new Clapp.Command({
 	}
 }));
 
-var userInput = "-testapp foo";
+let userInput = "-testapp foo";
 
 // Checks if the user input is an acceptable command
 if (app.isCliSentence(userInput)) {

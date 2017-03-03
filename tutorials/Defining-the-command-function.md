@@ -186,6 +186,17 @@ function(argv, context) {
 }
 ```
 
+Which then can be simplified again to:
+
+```javascript
+// Command function
+(argv, context) => new Promise((fulfill, reject) => {
+	doTheThing().then(() => {
+		fulfill("I'm done!");
+	}).catch(reject);
+});
+```
+
 This will log the error to the console, and send the following message to the output: `An internal
 error occurred while trying to execute the command <command>.`. You should only use the `reject` 
 function for errors that don't concern the user. For example, "the connection to the database 
