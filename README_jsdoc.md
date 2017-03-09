@@ -1,6 +1,9 @@
 # clapp [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
 > A tool for building command line apps that aren&#39;t necessarily built for the command line.
 
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/mellamopablo/clapp.svg)](http://isitmaintained.com/project/mellamopablo/clapp "Average time to resolve an issue") [![Percentage of issues still open](http://isitmaintained.com/badge/open/mellamopablo/clapp.svg)](http://isitmaintained.com/project/mellamopablo/clapp "Percentage of issues still open")
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
+
 ## Installation
 
 ```sh
@@ -51,7 +54,7 @@ if (app.isCliSentence(userInput)) {
 To get started see the [App reference]{@link App} and [Command reference]{@link Command}.
 
 If you used a previous version of Clapp, please see
-[v1.0.0 changes](https://mellamopablo.github.io/clapp/clapp/1.0.0/tutorial-v1-changes.html) 
+[v1.0.0 changes](https://mellamopablo.github.io/clapp/clapp/1.0.0/tutorial-v1-changes.html)
 to update your code.
 
 ## License
