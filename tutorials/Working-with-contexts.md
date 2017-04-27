@@ -4,37 +4,38 @@ When defining more advanced commands, there are scenarios where you may need to 
 
 Clapp provides the `context` interface to pass data to both the command and the `onReply` function. Let's take the basic example from the documentation:
 
-```javascript
-var foo = new Clapp.Command(
-	'foo',
-	function(argv, context) {
+```js
+const foo = new Clapp.Command({
+	name: "foo",
+	desc: "does foo things",
+	fn: (argv, context) => {
 		console.log(context);
 	}
-);
+});
 
-var myApp = new Clapp.App(
-	{
-		name: 'Test App',
-		desc: 'An app created with Clapp!',
-		prefix: '/testapp'
-	},
-	function(msg, context) {
+const myApp = new Clapp.App({
+	name: 'Test App',
+	desc: 'An app created with Clapp!',
+	prefix: '/testapp',
+	onReply: (msg, context) => {
 		// Called when the App shows an output
 		console.log(msg);
 	},
-	[foo]
-);
+	commands: [ foo ]
+});
 ```
 
-You'll notice the `context` param in your provided functions. The context is *anything* you want it to be. A string, a boolean, an object containing every useful info you need... You name it. You can pass the context to `parseInput`:
+You'll notice the `context` param in your provided functions. The context is *anything* you want it
+to be. A string, a boolean, an object containing every useful info you need... You name it. You can
+pass the context to `parseInput`:
 
 ```javascript
-app.parseInput('/testapp foo', user.hasElevatedPrivileges());
+app.parseInput('/testapp foo', { elevatedPrivileges: user.hasElevatedPrivileges() });
 ```
 When `foo` is executed, you get it back:
 ```javascript
 // foo
 function(argv, context) {
-    console.log(context); // Logs result of user.hasElevatedPrivileges()
+    console.log(context.elevatedPrivileges); // Logs result of user.hasElevatedPrivileges()
 }
 ```
