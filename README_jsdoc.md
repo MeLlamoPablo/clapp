@@ -12,10 +12,20 @@ $ npm install --save clapp
 
 ## Features
 
-* Input isn't restricted to node's `process.argv`, unlike other libraries, so you may use Clapp for a node cli app, or use it for anything alse. For instance, you may use it for a [discord bot](https://github.com/MeLlamoPablo/generator-discordbot), where an user message is the input, and the bot behaves like a command line app.
-* Clapp also handles command execution. When using other command parsing libraries, you'd need to manually execute the command function by evaluating the user input. Clapp will execute the command for you if the user input satisfies your needs, or let the user know the error otherwise.
-* Clapp allows you to have precise control of user input: it takes care of required arguments, default values, data types, and data validation for you.
-* It also handles documentation. Clapp takes an *"if you don't document it, go fuck yourself"* apporach, meaning that it will simply not work if you don't document your app. For example, if you don't declare an argument that you expect the user to pass, Clapp will ignore it and not pass it back to you. But because of that, Clapp is able to easily print documentation to the user when they pass the `--help` flag.
+* Input isn't restricted to node's `process.argv`, unlike other libraries, so you may use Clapp for
+a node cli app, or use it for anything alse. For instance, you may use it for a
+[discord bot](https://github.com/MeLlamoPablo/generator-discordbot), where an user message is the
+input, and the bot behaves like a command line app.
+* Clapp also handles command execution. When using other command parsing libraries, you'd need to
+manually execute the command function by evaluating the user input. Clapp will execute the command
+for you if the user input satisfies your needs, or let the user know the error otherwise.
+* Clapp allows you to have precise control of user input: it takes care of required arguments,
+default values, data types, and data validation for you.
+* It also handles documentation. Clapp takes an *"if you don't document it, go fuck yourself"*
+apporach, meaning that it will simply not work if you don't document your app. For example, if you
+don't declare an argument that you expect the user to pass, Clapp will ignore it and not pass it
+back to you. But because of that, Clapp is able to easily print documentation to the user when they
+pass the `--help` flag.
 * Clapp handles the `--version` flag as well.
 
 ## Usage
