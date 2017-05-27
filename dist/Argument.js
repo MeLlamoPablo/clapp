@@ -2,233 +2,102 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Argument = require("./Argument"),
-    Flag = require("./Flag"),
-    Table = require("cli-table2"),
-    str = require("./strings/en.js");
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Option = require("./Option");
 
 /* eslint-disable no-trailing-spaces */
 /**
- * A Command that can be bound to an App. A command represents a single function that achieves a
- * single purpose. The command can receive arguments and flags, and can return a string that will be
- * redirected to the app output (See: {@link onReply}).
+ * @class Argument
  *
- * @class  Command
+ * An argument is an option passed to a {@link Command}. In the CLI sentence (See
+ * [App.isCliSentence]{@link App#isCliSentence}) `/testapp foo bar`, `bar` would be the
+ * value of the first argument.
  *
  * @param {object} options
  *
  * @param {string} options.name
  *
- * The command's name. The command will be invoked  by writing the app prefix followed by a
- * space and the command's name.
- *
- * @param {function} options.fn
- *
- * The function that will be executed when the command is invoked. The function receives the
- * following params: {@link argv} and context. For more information, see
- * {@tutorial Defining-the-command-function}.
+ * The Argument name. This options has two  purposes: to document the command help, and to
+ * identify the option in the `argv.args` variable passed back to the command function.
  *
  * @param {string} options.desc
  *
- * A description of what the command does.
+ * A description about what the Argument is and what information the user is expected to
+ * supply. It is used to show the command help to the user.
  *
- * @param {Argument[]} [options.args]
+ * @param {string} options.type
  *
- * An array with every argument supported by the command. See {@link Argument}.
- * @param {Flag[]} [options.flags]
+ * The Argument data type, either `string` or `number`.
  *
- * An array with every flag supported by the command. See {@link Flag}.
+ * @param {boolean} [options.required=false]
  *
- * @param {boolean} [options.caseSensitive=true]
+ * Whether or not the Argument is required for the command to work. If the user fails to supply
+ * every required Argument, Clapp will warn them about the problem and redirect them to the
+ * command help.
  *
- * Whether or not the command is case sensitive.
+ * @param {string|number} [options.default]
  *
- * @param {boolean} [options.async=false]
+ * A default value that will be passed into the `argv.args` if the user does not supply a value.
+ * This only works if `required` is set to false; it has no effect otherwise. If `required` is
+ * set to false (its default value), then `default` is mandatory.
  *
- * DEPRECATED since 1.1.0. Use Promises instead, see {@tutorial Defining-the-command-function}.
- * Whether or not the command's function is asynchronous. If it is, it will receive a third
- * parameter: callback, that you will need to call when the process is over. See
- * {@tutorial Defining-the-command-function}.
+ * @param {validation[]} [options.validations]
+ *
+ * An array with every validation check that you want to perform on the user provided value. See
+ * {@link validation}.
  *
  * @example
- * let foo = new Clapp.Command({
- * 	name: "foo",
- * 	desc: "does foo things",
- * 	fn: function(argv, context) {
- * 		console.log("foo was executed!");
- * 	},
- * 	args: [
- * 		new Clapp.Argument({
- * 			name: "testarg",
- * 			desc: "A test argument",
- * 			type: "string",
- * 			required: false,
- * 			default: "testarg isn't defined"
- * 		})
- * 	],
- * 	flags: [
- * 		new Clapp.Flag({
- * 			name: "testflag",
- * 			desc: "A test flag",
- * 			alias: 't',
- * 			type: "boolean",
- * 			default: false
- * 		})
- * 	],
+ * let arg = new Clapp.Argument({
+ * 	name: "file",
+ * 	desc: "The file where the data will be saved",
+ * 	type: "string",
+ * 	required: false,
+ * 	default: "defaultfile.dat"
  * });
- *
- * app.addCommand(foo);
  */
 /* eslint-enable */
 
-var Command = function () {
-	function Command(options) {
-		_classCallCheck(this, Command);
+var Argument = function (_Option) {
+  _inherits(Argument, _Option);
 
-		if (typeof options.name !== "string" || // name is required
-		options.name === "" || typeof options.desc !== "string" || // desc is required
-		options.desc === "" || typeof options.fn !== "function" || // fn is required
-		options.args && !Array.isArray(options.args) || // args is not required
-		options.flags && !Array.isArray(options.flags) || // flags is not required
-		options.caseSensitive && typeof options.caseSensitive !== "boolean" || // caseSensitive is not required
-		options.async && typeof options.async !== "boolean" || // async is not required
-		options.aliases && !Array.isArray(options.aliases) // aliases is not required
+  function Argument(options) {
+    _classCallCheck(this, Argument);
 
+    var _this = _possibleConstructorReturn(this, (Argument.__proto__ || Object.getPrototypeOf(Argument)).call(this, options));
 
-		) {
-				throw new Error("Wrong parameters passed when creating command " + options.name + ". Please refer to the documentation.");
-			}
+    if (_this.type !== "string" && _this.type !== "number") {
+      throw new Error(_this._genErrStr("type is not string or number"));
+    }
 
-		this.name = options.name;
-		this.desc = options.desc;
-		this.async = options.async || false;
-		this.fn = options.fn;
-		this.caseSensitive = typeof options.caseSensitive === "boolean" ? options.caseSensitive : true;
-		this.suppressDeprecationWarnings = options.suppressDeprecationWarnings;
+    if (typeof options.required !== "boolean") {
+      _this.required = false;
+    } else {
+      _this.required = options.required;
+    }
 
-		this.args = {};
-		options.args = options.args || [];
-		for (var i = 0; i < options.args.length; i++) {
+    if (typeof options.default !== "undefined") {
+      _this.default = options.default;
+    }
 
-			if (options.args[i] instanceof Argument) {
-				this.args[options.args[i].name] = options.args[i];
-			} else if (_typeof(options.args[i]) === "object") {
-				// Give support to the deprecated API
-				this.args[options.args[i].name] = new Argument(options.args[i]);
-			} else {
-				throw new Error("One of the items in the args array is not an Argument.");
-			}
-		}
+    // If the argument is not required, it must have a default value
+    if (!_this.required && typeof _this.default !== "undefined") {
+      if (_typeof(_this.default) !== _this.type) {
+        throw new Error(_this._genErrStr("its default value doesn't match its data type"));
+      }
+    } else if (
+    // If it doesn't have a default value, then show an error.
+    !_this.required && typeof _this.default === "undefined") {
+      throw new Error(_this._genErrStr("it's not required, and no default value was" + " provided"));
+    }
+    return _this;
+  }
 
-		this.flags = {};
-		options.flags = options.flags || [];
-		for (var _i = 0; _i < options.flags.length; _i++) {
+  return Argument;
+}(Option);
 
-			if (options.flags[_i] instanceof Flag) {
-				this.flags[options.flags[_i].name] = options.flags[_i];
-			} else if (_typeof(options.flags[_i]) === "object") {
-				// Give support to the deprecated API
-				this.flags[options.flags[_i].name] = new Flag(options.flags[_i]);
-			} else {
-				throw new Error("One of the items in the flags array is not a Flag.");
-			}
-		}
-		
-		this.aliases = {};
-		options.aliases = options.aliases || [];
-		for (var i = 0; i < options.aliases.length; i++) {
-
-			if (typeof options.aliases[i] === "string") {
-				this.aliases[i] = options.aliases[i];
-			} else {
-				throw new Error("One of the items in the aliases array is not a string.");
-			}
-		}
-	}
-
-	/**
-  * Returns the command specific help
-  *
-  * @param {App} app We need it to access the parent app info.
-  * @return {string} The command help
-  * @private
-  */
-
-
-	_createClass(Command, [{
-		key: "_getHelp",
-		value: function _getHelp(app) {
-			var LINE_WIDTH = 100;
-
-			var r = str.help_usage + " " + app.prefix + " " + this.name + "\n";
-			// Add aliases
-			r += "Aliases for this command: ";
-			foreach(var i in this.aliases) {
-				r += this.aliases[i];
-				if((i + 1) < this.aliases.length) r += ",";
-			}
-			r += "\n",
-			
-			var args_table = void 0;
-
-			// Add every argument to the usage (Only if there are arguments)
-			if (Object.keys(this.args).length > 0) {
-				args_table = new Table({
-					chars: {
-						"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
-						"bottom-mid": "", "bottom-left": "", "bottom-right": "", "left": "",
-						"left-mid": "", "mid": "", "mid-mid": "", "right": "", "right-mid": "",
-						"middle": ""
-					},
-					head: ["Argument", "Description", "Default"],
-					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
-					wordWrap: true
-				});
-				for (var i in this.args) {
-					r += this.args[i].required ? " (" + i + ")" : " [" + i + "]";
-					args_table.push([i, typeof this.args[i].desc !== "undefined" ? this.args[i].desc : "", typeof this.args[i].default !== "undefined" ? this.args[i].default : ""]);
-				}
-			}
-
-			r += "\n" + this.desc;
-
-			if (Object.keys(this.args).length > 0) {
-				r += "\n\n" + str.help_av_args + ":\n\n" + args_table.toString();
-			}
-
-			// Add every flag, only if there are flags to add
-			if (Object.keys(this.flags).length > 0) {
-				var flags_table = new Table({
-					chars: {
-						"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
-						"bottom-mid": "", "bottom-left": "", "bottom-right": "", "left": "",
-						"left-mid": "", "mid": "", "mid-mid": "", "right": "", "right-mid": "",
-						"middle": ""
-					},
-					head: ["Option", "Description", "Default"],
-					colWidths: [0.20 * LINE_WIDTH, 0.35 * LINE_WIDTH, 0.25 * LINE_WIDTH],
-					wordWrap: true
-				});
-				for (var _i2 in this.flags) {
-					flags_table.push([(typeof this.flags[_i2].alias !== "undefined" ? "-" + this.flags[_i2].alias + ", " : "") + "--" + _i2, typeof this.flags[_i2].desc !== "undefined" ? this.flags[_i2].desc : "", typeof this.flags[_i2].default !== "undefined" ? this.flags[_i2].default : ""]);
-				}
-
-				r += "\n\n" + str.help_av_options + ":\n\n" + flags_table.toString();
-			}
-
-			if (Object.keys(this.args).length > 0) {
-				r += "\n\n" + str.help_args_required_optional;
-			}
-
-			return r;
-		}
-	}]);
-
-	return Command;
-}();
-
-module.exports = Command;
+module.exports = Argument;
