@@ -223,6 +223,21 @@ var App = function () {
 					cmd = command;
 					break;
 				}
+				// check if a command alias was provided instead
+				else {
+					var abort = false;				
+					for (var alias in command.aliases) {
+						var validAliasName = command.caseSensitive ? command.aliases[alias] : command.aliases[alias].toLowerCase();
+						
+						if(validUserInput === validAliasName) {
+							cmd = command;
+							abort = true;
+							break;
+						}
+						
+						if(abort) break;
+					}
+				}
 			}
 
 			if (!cmd) {
@@ -420,21 +435,23 @@ var App = function () {
 									this.reply(response.message, response.context);
 								}
 							} else {
-								var self = this;
-								cmd.fn(final_argv, context, function cb(response, newContext) {
-									if (typeof response === "string") {
-										if (typeof newContext !== "undefined") {
-											self.reply(response, newContext);
-										} else {
-											self.reply(response, context);
+								(function () {
+									var self = _this;
+									cmd.fn(final_argv, context, function cb(response, newContext) {
+										if (typeof response === "string") {
+											if (typeof newContext !== "undefined") {
+												self.reply(response, newContext);
+											} else {
+												self.reply(response, context);
+											}
 										}
-									}
-								});
+									});
 
-								if (!cmd.suppressDeprecationWarnings) {
-									/* istanbul ignore next */
-									console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
-								}
+									if (!cmd.suppressDeprecationWarnings) {
+										/* istanbul ignore next */
+										console.warn("The Command.async property is deprecated. Please" + " return a Promise instead; refer to the documentation.\n" + "Set the suppressDeprecationWarnings property to true in" + " order to ignore this warning.");
+									}
+								})();
 							}
 						} else {
 							response = this.str.err + this.str.err_type_mismatch + "\n\n";

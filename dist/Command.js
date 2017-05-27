@@ -55,7 +55,7 @@ var Argument = require("./Argument"),
  * {@tutorial Defining-the-command-function}.
  *
  * @example
- * var foo = new Clapp.Command({
+ * let foo = new Clapp.Command({
  * 	name: "foo",
  * 	desc: "does foo things",
  * 	fn: function(argv, context) {
@@ -95,7 +95,8 @@ var Command = function () {
 		options.args && !Array.isArray(options.args) || // args is not required
 		options.flags && !Array.isArray(options.flags) || // flags is not required
 		options.caseSensitive && typeof options.caseSensitive !== "boolean" || // caseSensitive is not required
-		options.async && typeof options.async !== "boolean" // async is not required
+		options.async && typeof options.async !== "boolean" || // async is not required
+		options.aliases && !Array.isArray(options.aliases) // aliases is not required
 
 
 		) {
@@ -136,6 +137,17 @@ var Command = function () {
 				throw new Error("One of the items in the flags array is not a Flag.");
 			}
 		}
+		
+		this.aliases = {};
+		options.aliases = options.aliases || [];
+		for (var i = 0; i < options.aliases.length; i++) {
+
+			if (typeof options.aliases[i] === "string") {
+				this.aliases[i] = options.aliases[i];
+			} else {
+				throw new Error("One of the items in the aliases array is not a string.");
+			}
+		}
 	}
 
 	/**
@@ -152,7 +164,15 @@ var Command = function () {
 		value: function _getHelp(app) {
 			var LINE_WIDTH = 100;
 
-			var r = str.help_usage + " " + app.prefix + " " + this.name;
+			var r = str.help_usage + " " + app.prefix + " " + this.name + "\n";
+			// Add aliases
+			r += "Aliases for this command: ";
+			foreach(var i in this.aliases) {
+				r += this.aliases[i];
+				if((i + 1) < this.aliases.length) r += ",";
+			}
+			r += "\n",
+			
 			var args_table = void 0;
 
 			// Add every argument to the usage (Only if there are arguments)
