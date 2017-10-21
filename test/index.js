@@ -1390,7 +1390,7 @@ describe('Clapp.Command', function(){
 		});
 
 		expect(foo).to.be.a(Clapp.Command);
-		expect(foo.args).to.have.property('testarg');
+		expect(foo.args[0].name).to.be('testarg');
 		expect(foo.flags).to.have.property('testflag');
 	});
 
@@ -1420,7 +1420,7 @@ describe('Clapp.Command', function(){
 		});
 
 		expect(foo).to.be.a(Clapp.Command);
-		expect(foo.args).to.have.property('testarg');
+		expect(foo.args[0].name).to.be('testarg');
 		expect(foo.flags).to.have.property('testflag');
 	});
 
