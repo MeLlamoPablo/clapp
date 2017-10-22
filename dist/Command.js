@@ -55,7 +55,7 @@ var Argument = require("./Argument"),
  * {@tutorial Defining-the-command-function}.
  *
  * @example
- * var foo = new Clapp.Command({
+ * let foo = new Clapp.Command({
  * 	name: "foo",
  * 	desc: "does foo things",
  * 	fn: function(argv, context) {
@@ -109,15 +109,15 @@ var Command = function () {
 		this.caseSensitive = typeof options.caseSensitive === "boolean" ? options.caseSensitive : true;
 		this.suppressDeprecationWarnings = options.suppressDeprecationWarnings;
 
-		this.args = {};
+		this.args = [];
 		options.args = options.args || [];
 		for (var i = 0; i < options.args.length; i++) {
 
 			if (options.args[i] instanceof Argument) {
-				this.args[options.args[i].name] = options.args[i];
+				this.args.push(options.args[i]);
 			} else if (_typeof(options.args[i]) === "object") {
 				// Give support to the deprecated API
-				this.args[options.args[i].name] = new Argument(options.args[i]);
+				this.args.push(new Argument(options.args[i]));
 			} else {
 				throw new Error("One of the items in the args array is not an Argument.");
 			}
@@ -156,7 +156,7 @@ var Command = function () {
 			var args_table = void 0;
 
 			// Add every argument to the usage (Only if there are arguments)
-			if (Object.keys(this.args).length > 0) {
+			if (this.args.length) {
 				args_table = new Table({
 					chars: {
 						"top": "", "top-mid": "", "top-left": "", "top-right": "", "bottom": "",
@@ -169,14 +169,15 @@ var Command = function () {
 					wordWrap: true
 				});
 				for (var i in this.args) {
-					r += this.args[i].required ? " (" + i + ")" : " [" + i + "]";
-					args_table.push([i, typeof this.args[i].desc !== "undefined" ? this.args[i].desc : "", typeof this.args[i].default !== "undefined" ? this.args[i].default : ""]);
+					var arg = this.args[i];
+					r += arg.required ? " (" + i + ")" : " [" + i + "]";
+					args_table.push([i, typeof arg.desc !== "undefined" ? arg.desc : "", typeof arg.default !== "undefined" ? arg.default : ""]);
 				}
 			}
 
 			r += "\n" + this.desc;
 
-			if (Object.keys(this.args).length > 0) {
+			if (this.args.length) {
 				r += "\n\n" + str.help_av_args + ":\n\n" + args_table.toString();
 			}
 
@@ -200,7 +201,7 @@ var Command = function () {
 				r += "\n\n" + str.help_av_options + ":\n\n" + flags_table.toString();
 			}
 
-			if (Object.keys(this.args).length > 0) {
+			if (this.args.length) {
 				r += "\n\n" + str.help_args_required_optional;
 			}
 
