@@ -251,20 +251,20 @@ var App = function () {
 					this.reply(cmd._getHelp(this), context);
 				} else {
 					// Find whether or not it supplies every required argument.
-					var unfulfilled_args = {};
+					var unfulfilled_args = [];
 					var j = 1; // 1 because argv._[0] is the command name
 					for (var i in cmd.args) {
 						if (cmd.args[i].required && typeof argv._[j] === "undefined") {
-							unfulfilled_args[i] = cmd.args[i];
+							unfulfilled_args.push(cmd.args[i]);
 						}
 
 						j++;
 					}
 
-					if (Object.keys(unfulfilled_args).length > 0) {
+					if (unfulfilled_args.length) {
 						var r = this.str.err + this.str.err_unfulfilled_args + "\n";
 						for (var _i in unfulfilled_args) {
-							r += _i + "\n";
+							r += unfulfilled_args[_i.name] + "\n";
 						}
 						r += "\n" + this.str.err_type_help.replace("%PREFIX%", this.prefix + " " + argv._[0]);
 
@@ -278,18 +278,18 @@ var App = function () {
 						for (var _i2 in cmd.args) {
 							var arg = cmd.args[_i2];
 
-							final_argv.args[_i2] = argv._[j];
+							final_argv.args[arg.name] = argv._[j];
 
 							// If the arg wasn't supplied and it has a default value, use it
-							if (typeof final_argv.args[_i2] === "undefined" && typeof arg.default !== "undefined") {
-								final_argv.args[_i2] = arg.default;
+							if (typeof final_argv.args[arg.name] === "undefined" && typeof arg.default !== "undefined") {
+								final_argv.args[arg.name] = arg.default;
 							}
 
 							// Convert it to the correct type, and register errors.
-							final_argv.args[_i2] = App._convertType(final_argv.args[_i2], arg.type);
+							final_argv.args[arg.name] = App._convertType(final_argv.args[arg.name], arg.type);
 
-							if (_typeof(final_argv.args[_i2]) === "object") {
-								errors.push("Error on argument " + _i2 + ": expected " + final_argv.args[_i2].expectedType + ", got " + final_argv.args[_i2].providedType + " instead.");
+							if (_typeof(final_argv.args[arg.name]) === "object") {
+								errors.push("Error on argument " + _i2 + ": expected " + final_argv.args[arg.name].expectedType + ", got " + final_argv.args[arg.name].providedType + " instead.");
 							} else {
 								// If the user input matches the required data type, perform every
 								// validation, if there's any:
@@ -301,7 +301,7 @@ var App = function () {
 									for (var _iterator = arg.validations[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 										var validation = _step.value;
 
-										if (!validation.validate(final_argv.args[_i2])) {
+										if (!validation.validate(final_argv.args[arg.name])) {
 											errors.push("Error on argument " + _i2 + ": " + validation.errorMessage);
 										}
 									}
