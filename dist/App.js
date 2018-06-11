@@ -7,7 +7,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Command = require("./Command.js"),
-    Table = require("cli-table2"),
+    Table = require("cli-table3"),
     defaultStr = require("./strings/en.js"),
     parseSentence = require("minimist-string");
 

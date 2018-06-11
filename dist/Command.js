@@ -8,7 +8,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var Argument = require("./Argument"),
     Flag = require("./Flag"),
-    Table = require("cli-table2"),
+    Table = require("cli-table3"),
     str = require("./strings/en.js");
 
 /* eslint-disable no-trailing-spaces */
