@@ -118,12 +118,12 @@ _getHelp(app) {
 }
 ```
 
-Note that the `str` object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the [cli-table2](https://www.npmjs
-.com/package/cli-table2) function comes already as a dependency with Clapp, so fel free to use it
+Note that the `str` object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the [cli-table3](https://www.npmjs
+.com/package/cli-table3) function comes already as a dependency with Clapp, so fel free to use it
  with:
 
 ```js
-const Table = require('cli-table2');
+const Table = require('cli-table3');
 ```
 
 ## Extending App
