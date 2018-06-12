@@ -136,9 +136,9 @@ _getHelp(app) {
 
     return r;
 }</code></pre><p>Note that the <code>str</code> object won't be available to you since Clapp doesn't export it. You may copy it from the source, or replace it with your own strings. Note also that the <a href="https://www.npmjs
-.com/package/cli-table3">cli-table3</a> function comes already as a dependency with Clapp, so fel free to use it
+.com/package/cli-table2">cli-table2</a> function comes already as a dependency with Clapp, so fel free to use it
  with:</p>
-<pre class="prettyprint source lang-js"><code>const Table = require('cli-table3');</code></pre><h2>Extending App</h2><p>The procedure for extending App is the same:</p>
+<pre class="prettyprint source lang-js"><code>const Table = require('cli-table2');</code></pre><h2>Extending App</h2><p>The procedure for extending App is the same:</p>
 <pre class="prettyprint source lang-js"><code>class MyApp extends Clapp.App {
     constructor(options) {
         super(options);
