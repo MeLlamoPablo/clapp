@@ -33,13 +33,14 @@
     "gulp-eslint": "^3.0.1",
     "gulp-exclude-gitignore": "^1.0.0",
     "gulp-istanbul": "^1.0.0",
-    "gulp-line-ending-corrector": "^1.0.1",
+    "gulp-line-ending-corrector": "^1.0.3",
     "gulp-mocha": "^3.0.1",
     "gulp-nsp": "^2.1.0",
-    "gulp-plumber": "^1.0.0",
+    "gulp-plumber": "^1.2.1",
     "gulp-tap": "^0.1.3",
-    "isparta": "^4.0.0",
-    "jsdoc": "^3.4.1"
+    "isparta": "^4.1.1",
+    "jsdoc": "^3.4.1",
+    "natives": "^1.1.6"
   },
   "repository": "MeLlamoPablo/clapp",
   "scripts": {
@@ -49,7 +50,7 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "cli-table3": "^0.5.0",
+    "cli-table3": "^0.5.1",
     "minimist-string": "^1.0.2"
   }
 }
