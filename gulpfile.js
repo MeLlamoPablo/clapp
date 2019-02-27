@@ -6,7 +6,6 @@ var excludeGitignore = require('gulp-exclude-gitignore');
 var eslint = require('gulp-eslint');
 var mocha = require('gulp-mocha');
 var istanbul = require('gulp-istanbul');
-var nsp = require('gulp-nsp');
 var plumber = require('gulp-plumber');
 var coveralls = require('gulp-coveralls');
 var babel = require('gulp-babel');
@@ -18,10 +17,6 @@ var pkg = require('./package.json');
 // Initialize the babel transpiler so ES2015 files gets compiled
 // when they're loaded
 require('babel-register');
-
-gulp.task('nsp', function (cb) {
-  nsp({package: path.resolve('package.json')}, cb);
-});
 
 gulp.task('pre-test', function () {
   return gulp.src('lib/**/*.js')
@@ -91,5 +86,5 @@ gulp.task('update-doc-version', function(){
 		.pipe(gulp.dest('./docs/'));
 });
 
-gulp.task('prepublish', ['nsp', 'babel', 'update-doc-version']);
+gulp.task('prepublish', ['babel', 'update-doc-version']);
 gulp.task('default', ['test', 'coveralls', 'eslint']);
