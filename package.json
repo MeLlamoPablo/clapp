@@ -1,6 +1,6 @@
 {
   "name": "clapp",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "A tool for building command line apps that don't aren't necessarily built for the command line.",
   "homepage": "http://mellamopablo.github.io/clapp/latest.html",
   "author": {
